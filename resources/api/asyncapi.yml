@@ -16,6 +16,7 @@ channels:
                     - $ref: '#/components/messages/PaymentCanceled'
                     - $ref: '#/components/messages/PaymentCancellationFailed'
                     - $ref: '#/components/messages/PaymentCreated'
+                    - $ref: '#/components/messages/PaymentUpdated'
 
     payment-commands:
         publish:
@@ -30,6 +31,7 @@ channels:
             message:
                 oneOf:
                     - $ref: '#/components/messages/AddPaymentMethod'
+                    - $ref: '#/components/messages/UpdatePaymentMethod'
                     - $ref: '#/components/messages/DeletePaymentMethod'
 components:
     messages:
@@ -38,6 +40,15 @@ components:
             x-spryker:
                 module: Payment
             summary: 'Informs about a new Payment method.'
+            payload:
+                $ref: '#/components/schemas/PaymentMethodPayload'
+            headers:
+                $ref: '#/components/schemas/message-broker/components/schemas/headers'
+        UpdatePaymentMethod:
+            name: UpdatePaymentMethod
+            x-spryker:
+                module: Payment
+            summary: 'Informs about an update of an existing Payment method.'
             payload:
                 $ref: '#/components/schemas/PaymentMethodPayload'
             headers:
@@ -160,6 +171,15 @@ components:
                 $ref: '#/components/schemas/PaymentCreatedPayload'
             headers:
                 $ref: '#/components/schemas/message-broker/components/schemas/headers'
+        PaymentUpdated:
+            name: PaymentUpdated
+            x-spryker:
+                module: Payment
+            summary: 'Informs about a new Payment was updated for an order.'
+            payload:
+                $ref: '#/components/schemas/PaymentUpdatedPayload'
+            headers:
+                $ref: '#/components/schemas/message-broker/components/schemas/headers'
 
     schemas:
         PaymentMethodPayload:
@@ -190,6 +210,18 @@ components:
                                     example:
                                         - /authorization
                                         - /transfer
+                        checkoutConfiguration:
+                            type: object
+                            description: 'Optional configuration for sophisticated payment methods that support e.g. CheckoutSession or Embedded payment forms.'
+                            properties:
+                                strategy:
+                                    type: string
+                                    examples:
+                                        - embedded
+                                        - checkout-session
+                                scripts:
+                                    type: array
+                                    description: 'List of scripts that should be included in the checkout page.'
             required:
                 - name
                 - providerName
@@ -224,6 +256,18 @@ components:
                 - orderItems
                 - amount
         PaymentCreatedPayload:
+            type: object
+            properties:
+                entityReference:
+                    description: 'The entity reference of the payment. It can be anything on the SCOS side like a sales order or subscription reference. The entity reference is not required as pre-order payments do not have a order reference.'
+                    type: string
+                paymentReference:
+                    type: string
+                details:
+                    type: string
+            required:
+                - paymentReference
+        PaymentUpdatedPayload:
             type: object
             properties:
                 entityReference:

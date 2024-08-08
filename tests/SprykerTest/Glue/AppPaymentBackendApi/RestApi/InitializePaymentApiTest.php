@@ -78,6 +78,48 @@ class InitializePaymentApiTest extends Unit
         $this->tester->assertSamePaymentQuoteAndRequestQuote($transactionId, $initializePaymentRequestTransfer->getOrderData());
     }
 
+    public function testInitializePaymentPostRequestWithoutOrderReferenceReturnsHttpResponseCode200WithAClientSecretAndPersistsQuoteWithTransactionId(): void
+    {
+        // Arrange
+        $transactionId = Uuid::uuid4()->toString();
+
+        $initializePaymentRequestTransfer = $this->tester->haveInitializePaymentRequestTransfer();
+        $initializePaymentRequestTransfer->getOrderData()->setOrderReference(null);
+
+        $this->tester->haveAppConfigForTenant($initializePaymentRequestTransfer->getTenantIdentifier());
+
+        $initializePaymentResponseTransfer = new InitializePaymentResponseTransfer();
+        $initializePaymentResponseTransfer
+            ->setIsSuccessful(true)
+            ->setTransactionId($transactionId);
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformPluginInterface::class, [
+            'initializePayment' => function (InitializePaymentRequestTransfer $initializePaymentRequestTransfer) use ($initializePaymentResponseTransfer) {
+                // Ensure that the AppConfig is always passed to the platform plugin.
+                $this->assertInstanceOf(AppConfigTransfer::class, $initializePaymentRequestTransfer->getAppConfig());
+                $initializePaymentResponseTransfer->setClientSecret(Uuid::uuid4()->toString());
+
+                return $initializePaymentResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        // Act
+        $this->tester->addHeader(GlueRequestPaymentMapper::HEADER_TENANT_IDENTIFIER, $initializePaymentRequestTransfer->getTenantIdentifier());
+        $this->tester->addHeader('Content-Type', 'application/json');
+
+        $response = $this->tester->sendPost($this->tester->buildPaymentUrl(), [RequestOptions::FORM_PARAMS => $initializePaymentRequestTransfer->toArray()]);
+
+        // Assert
+        $this->tester->seeResponseCodeIs(Response::HTTP_OK);
+        $this->tester->seeResponseIsJson();
+        $this->tester->seeResponseJsonContainsClientSecret($response);
+
+        $this->tester->assertPaymentWithTransactionIdExists($transactionId);
+        $this->tester->assertSamePaymentQuoteAndRequestQuote($transactionId, $initializePaymentRequestTransfer->getOrderData());
+    }
+
     public function testInitializePaymentPostRequestReturnsHttpResponseCode200AndForwardsAdditionalPaymentDataToThePlatformImplementation(): void
     {
         // Arrange

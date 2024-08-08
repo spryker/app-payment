@@ -24,8 +24,12 @@ class AppPaymentConfig extends AbstractBundleConfig
 
     public function getPaymentProviderName(): string
     {
-        // When extracting into a standalone package we should throw an exception here when this method is not overridden on project level
-        return 'You need to configure the PaymentProviderName omn the project level';
+        return 'You need to configure the PaymentProviderName on the project level';
+    }
+
+    public function getPaymentMethodName(): string
+    {
+        return 'You need to configure the PaymentMethodName on the project level';
     }
 
     public function getZedBaseUrl(): string

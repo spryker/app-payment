@@ -7,6 +7,16 @@
     <transfer name="InitializePaymentResponse" strict="true">
     </transfer>
 
+    <transfer name="ConfirmPreOrderPaymentRequest" strict="true">
+        <property name="orderReference" type="string"/>
+        <property name="paymentServiceProviderData" type="array" associative="true" singular="paymentServiceProviderDatum"/>
+    </transfer>
+
+    <transfer name="ConfirmPreOrderPaymentResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="message" type="string"/>
+    </transfer>
+
     <transfer name="PaymentTransmissionsRequest" strict="true">
         <property name="appConfig" type="AppConfig"/>
         <property name="tenantIdentifier" type="string"/>

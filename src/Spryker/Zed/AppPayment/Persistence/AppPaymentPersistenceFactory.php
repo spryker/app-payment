@@ -7,6 +7,7 @@
 
 namespace Spryker\Zed\AppPayment\Persistence;
 
+use Orm\Zed\AppPayment\Persistence\SpyPaymentMethodQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentRefundQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentTransferQuery;
@@ -23,6 +24,11 @@ class AppPaymentPersistenceFactory extends AbstractPersistenceFactory
     public function createPaymentQuery(): SpyPaymentQuery
     {
         return new SpyPaymentQuery();
+    }
+
+    public function createPaymentMethodQuery(): SpyPaymentMethodQuery
+    {
+        return new SpyPaymentMethodQuery();
     }
 
     public function createPaymentRefundQuery(): SpyPaymentRefundQuery

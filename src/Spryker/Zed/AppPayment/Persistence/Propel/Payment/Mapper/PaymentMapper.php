@@ -7,10 +7,12 @@
 
 namespace Spryker\Zed\AppPayment\Persistence\Propel\Payment\Mapper;
 
+use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\PaymentRefundTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionTransfer;
 use Orm\Zed\AppPayment\Persistence\SpyPayment;
+use Orm\Zed\AppPayment\Persistence\SpyPaymentMethod;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentRefund;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentTransfer;
 use Propel\Runtime\Collection\Collection;
@@ -36,6 +38,32 @@ class PaymentMapper
         $paymentData[PaymentTransfer::QUOTE] = $quoteData;
 
         return $paymentTransfer->fromArray($paymentData, true);
+    }
+
+    public function mapPaymentMethodTransferToPaymentMethodEntity(
+        PaymentMethodTransfer $paymentMethodTransfer,
+        SpyPaymentMethod $spyPaymentMethod
+    ): SpyPaymentMethod {
+        $paymentMethodData = $paymentMethodTransfer->modifiedToArray();
+
+        if (isset($paymentMethodData['payment_method_app_configuration'])) {
+            $paymentMethodData['payment_method_app_configuration'] = json_encode($paymentMethodData['payment_method_app_configuration']);
+        }
+
+        return $spyPaymentMethod->fromArray($paymentMethodData);
+    }
+
+    public function mapPaymentMethodEntityToPaymentMethodTransfer(
+        SpyPaymentMethod $spyPaymentMethod,
+        PaymentMethodTransfer $paymentMethodTransfer
+    ): PaymentMethodTransfer {
+        $paymentMethodData = $spyPaymentMethod->toArray();
+
+        if (isset($paymentMethodData['payment_method_app_configuration'])) {
+            $paymentMethodData['payment_method_app_configuration'] = json_decode($paymentMethodData['payment_method_app_configuration'], true);
+        }
+
+        return $paymentMethodTransfer->fromArray($paymentMethodData, true);
     }
 
     /**

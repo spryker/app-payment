@@ -7,6 +7,7 @@
 
 namespace Spryker\Glue\AppPaymentBackendApi\Plugin\GlueApplication;
 
+use Spryker\Glue\AppPaymentBackendApi\Controller\ConfirmPreOrderPaymentResourceController;
 use Spryker\Glue\AppPaymentBackendApi\Controller\InitializePaymentResourceController;
 use Spryker\Glue\AppPaymentBackendApi\Controller\PaymentsTransfersResourceController;
 use Spryker\Glue\GlueApplicationExtension\Dependency\Plugin\RouteProviderPluginInterface;
@@ -23,6 +24,7 @@ class AppPaymentBackendApiRouteProviderPlugin extends AbstractPlugin implements 
     public function addRoutes(RouteCollection $routeCollection): RouteCollection
     {
         $routeCollection->add('postPayment', $this->getPostPaymentRoute());
+        $routeCollection->add('postConfirmPreOrderPayment', $this->getPostConfirmPreOrderPaymentRoute());
         $routeCollection->add('postPaymentsTransfers', $this->getPostPaymentsTransfersRoute());
 
         return $routeCollection;
@@ -33,6 +35,17 @@ class AppPaymentBackendApiRouteProviderPlugin extends AbstractPlugin implements 
         return (new Route('/private/initialize-payment'))
             ->setDefaults([
                 '_controller' => [InitializePaymentResourceController::class, 'postAction'],
+                '_resourceName' => 'Payment',
+                '_method' => 'post',
+            ])
+            ->setMethods(Request::METHOD_POST);
+    }
+
+    public function getPostConfirmPreOrderPaymentRoute(): Route
+    {
+        return (new Route('/private/confirm-pre-order-payment'))
+            ->setDefaults([
+                '_controller' => [ConfirmPreOrderPaymentResourceController::class, 'postAction'],
                 '_resourceName' => 'Payment',
                 '_method' => 'post',
             ])

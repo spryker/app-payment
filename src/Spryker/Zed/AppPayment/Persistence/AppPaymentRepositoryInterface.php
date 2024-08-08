@@ -7,6 +7,7 @@
 
 namespace Spryker\Zed\AppPayment\Persistence;
 
+use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\PaymentRefundTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
 
@@ -52,4 +53,13 @@ interface AppPaymentRepositoryInterface
      * @return array<\Generated\Shared\Transfer\PaymentTransmissionTransfer>
      */
     public function findPaymentTransmissionsByTransferIds(array $transferIds): array;
+
+    /**
+     * @return array<\Generated\Shared\Transfer\PaymentMethodTransfer>
+     */
+    public function getTenantPaymentMethods(string $tenantIdentifier): array;
+
+    public function savePaymentMethod(PaymentMethodTransfer $paymentMethodTransfer, string $tenantIdentifier): PaymentMethodTransfer;
+
+    public function deletePaymentMethod(PaymentMethodTransfer $paymentMethodTransfer, string $tenantIdentifier): PaymentMethodTransfer;
 }

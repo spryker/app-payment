@@ -10,6 +10,7 @@ namespace SprykerTest\Shared\AppPayment\Helper;
 use Codeception\Module;
 use Generated\Shared\DataBuilder\CancelPaymentRequestBuilder;
 use Generated\Shared\DataBuilder\CapturePaymentRequestBuilder;
+use Generated\Shared\DataBuilder\ConfirmPreOrderPaymentRequestBuilder;
 use Generated\Shared\DataBuilder\InitializePaymentRequestBuilder;
 use Generated\Shared\DataBuilder\OrderItemBuilder;
 use Generated\Shared\DataBuilder\PaymentBuilder;
@@ -19,6 +20,7 @@ use Generated\Shared\DataBuilder\PaymentTransmissionsResponseBuilder;
 use Generated\Shared\DataBuilder\QuoteBuilder;
 use Generated\Shared\Transfer\CancelPaymentRequestTransfer;
 use Generated\Shared\Transfer\CapturePaymentRequestTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\OrderItemTransfer;
 use Generated\Shared\Transfer\PaymentPageRequestTransfer;
@@ -164,6 +166,21 @@ class AppPaymentHelper extends Module
         $initializePaymentRequestTransfer->setAppConfig($appConfigTransfer);
 
         return $initializePaymentRequestTransfer;
+    }
+
+    public function haveConfirmPreOrderPaymentRequestTransfer(array $seed = []): ConfirmPreOrderPaymentRequestTransfer
+    {
+        $tenantIdentifier = $seed[ConfirmPreOrderPaymentRequestTransfer::TENANT_IDENTIFIER] ?? Uuid::uuid4()->toString();
+        $orderReference = $seed[ConfirmPreOrderPaymentRequestTransfer::ORDER_REFERENCE] ?? Uuid::uuid4()->toString();
+        $transactionId = $seed[ConfirmPreOrderPaymentRequestTransfer::TRANSACTION_ID] ?? Uuid::uuid4()->toString();
+
+        $confirmPreOrderPaymentRequestTransfer = (new ConfirmPreOrderPaymentRequestBuilder($seed))->build();
+        $confirmPreOrderPaymentRequestTransfer
+            ->setTenantIdentifier($tenantIdentifier)
+            ->setOrderReference($orderReference)
+            ->setTransactionId($transactionId);
+
+        return $confirmPreOrderPaymentRequestTransfer;
     }
 
     public function havePaymentPageRequestTransfer(array $seed = []): PaymentPageRequestTransfer

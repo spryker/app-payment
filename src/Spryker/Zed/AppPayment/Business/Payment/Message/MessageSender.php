@@ -8,13 +8,8 @@
 namespace Spryker\Zed\AppPayment\Business\Payment\Message;
 
 use ArrayObject;
-use Generated\Shared\Transfer\AddPaymentMethodTransfer;
-use Generated\Shared\Transfer\AppConfigTransfer;
-use Generated\Shared\Transfer\DeletePaymentMethodTransfer;
-use Generated\Shared\Transfer\EndpointTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
-use Generated\Shared\Transfer\MessageAttributesTransfer;
 use Generated\Shared\Transfer\MessageContextTransfer;
 use Generated\Shared\Transfer\PaymentAuthorizationFailedTransfer;
 use Generated\Shared\Transfer\PaymentAuthorizedTransfer;
@@ -23,84 +18,16 @@ use Generated\Shared\Transfer\PaymentCancellationFailedTransfer;
 use Generated\Shared\Transfer\PaymentCapturedTransfer;
 use Generated\Shared\Transfer\PaymentCaptureFailedTransfer;
 use Generated\Shared\Transfer\PaymentCreatedTransfer;
-use Generated\Shared\Transfer\PaymentMethodAppConfigurationTransfer;
 use Generated\Shared\Transfer\PaymentRefundedTransfer;
 use Generated\Shared\Transfer\PaymentRefundFailedTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
+use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Generated\Shared\Transfer\QuoteItemTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 use Spryker\Shared\Kernel\Transfer\TransferInterface;
-use Spryker\Zed\AppKernel\AppKernelConfig;
-use Spryker\Zed\AppPayment\AppPaymentConfig;
-use Spryker\Zed\AppPayment\Dependency\Facade\AppPaymentToMessageBrokerFacadeInterface;
 
-class MessageSender
+class MessageSender extends AbstractMessageSender
 {
-    public function __construct(
-        protected AppPaymentToMessageBrokerFacadeInterface $appPaymentToMessageBrokerFacade,
-        protected AppPaymentConfig $appPaymentConfig
-    ) {
-    }
-
-    public function sendAddPaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
-    {
-        // Do not send the message when App is in state "disconnected" or when the app is marked as inactive.
-        if ($appConfigTransfer->getStatus() === AppKernelConfig::APP_STATUS_DISCONNECTED || $appConfigTransfer->getIsActive() === false) {
-            return $appConfigTransfer;
-        }
-
-        $paymentMethodAppConfigurationTransfer = new PaymentMethodAppConfigurationTransfer();
-        $paymentMethodAppConfigurationTransfer->setBaseUrl($this->appPaymentConfig->getGlueBaseUrl());
-
-        $authorizationEndpointTransfer = new EndpointTransfer();
-        $authorizationEndpointTransfer
-            ->setName('authorization')
-            ->setPath('/private/initialize-payment'); // Defined in app_payment_openapi.yml
-
-        $paymentMethodAppConfigurationTransfer->addEndpoint($authorizationEndpointTransfer);
-
-        $transferEndpointTransfer = new EndpointTransfer();
-        $transferEndpointTransfer
-            ->setName('transfer')
-            ->setPath('/private/payments/transfers'); // Defined in app_payment_openapi.yml
-
-        $paymentMethodAppConfigurationTransfer->addEndpoint($transferEndpointTransfer);
-
-        $addPaymentMethodTransfer = new AddPaymentMethodTransfer();
-        $addPaymentMethodTransfer
-            ->setName($this->appPaymentConfig->getPaymentProviderName())
-            ->setPaymentAuthorizationEndpoint(sprintf('%s/private/initialize-payment', $this->appPaymentConfig->getGlueBaseUrl()))
-            ->setProviderName($this->appPaymentConfig->getPaymentProviderName())
-            ->setPaymentMethodAppConfiguration($paymentMethodAppConfigurationTransfer);
-
-        $addPaymentMethodTransfer->setMessageAttributes($this->getMessageAttributes(
-            $appConfigTransfer->getTenantIdentifierOrFail(),
-            $addPaymentMethodTransfer::class,
-        ));
-
-        $this->appPaymentToMessageBrokerFacade->sendMessage($addPaymentMethodTransfer);
-
-        return $appConfigTransfer;
-    }
-
-    public function sendDeletePaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
-    {
-        $deletePaymentMethodTransfer = new DeletePaymentMethodTransfer();
-        $deletePaymentMethodTransfer
-            ->setName($this->appPaymentConfig->getPaymentProviderName())
-            ->setPaymentAuthorizationEndpoint(sprintf('%s/private/initialize-payment', $this->appPaymentConfig->getGlueBaseUrl()))
-            ->setProviderName($this->appPaymentConfig->getPaymentProviderName());
-
-        $deletePaymentMethodTransfer->setMessageAttributes($this->getMessageAttributes(
-            $appConfigTransfer->getTenantIdentifierOrFail(),
-            $deletePaymentMethodTransfer::class,
-        ));
-
-        $this->appPaymentToMessageBrokerFacade->sendMessage($deletePaymentMethodTransfer);
-
-        return $appConfigTransfer;
-    }
-
     public function sendPaymentCapturedMessage(PaymentTransfer $paymentTransfer, ?MessageContextTransfer $messageContextTransfer = null): void
     {
         $paymentCapturedTransfer = $this->mapPaymentTransferToPaymentMessageTransfer($paymentTransfer, new PaymentCapturedTransfer(), $messageContextTransfer);
@@ -137,7 +64,7 @@ class MessageSender
         $this->appPaymentToMessageBrokerFacade->sendMessage($paymentAuthorizedTransfer);
     }
 
-    public function sendPaymentPreAuthorizationFailedMessage(PaymentTransfer $paymentTransfer): void
+    public function sendPaymentAuthorizationFailedMessage(PaymentTransfer $paymentTransfer): void
     {
         $paymentAuthorizationFailedTransfer = $this->mapPaymentTransferToPaymentMessageTransfer($paymentTransfer, new PaymentAuthorizationFailedTransfer());
 
@@ -182,7 +109,7 @@ class MessageSender
         $paymentCreatedTransfer = new PaymentCreatedTransfer();
         $paymentCreatedTransfer->fromArray($initializePaymentResponseTransfer->toArray(), true);
         $paymentCreatedTransfer
-            ->setEntityReference($quoteTransfer->getOrderReferenceOrFail())
+            ->setEntityReference($quoteTransfer->getOrderReference())
             ->setPaymentReference($initializePaymentResponseTransfer->getTransactionIdOrFail());
 
         $paymentCreatedTransfer->setMessageAttributes($this->getMessageAttributes(
@@ -191,6 +118,21 @@ class MessageSender
         ));
 
         $this->appPaymentToMessageBrokerFacade->sendMessage($paymentCreatedTransfer);
+    }
+
+    public function sendPaymentUpdatedMessage(PaymentTransfer $paymentTransfer): void
+    {
+        $paymentUpdatedTransfer = new PaymentUpdatedTransfer();
+        $paymentUpdatedTransfer
+            ->setEntityReference($paymentTransfer->getOrderReference())
+            ->setPaymentReference($paymentTransfer->getTransactionIdOrFail());
+
+        $paymentUpdatedTransfer->setMessageAttributes($this->getMessageAttributes(
+            $paymentTransfer->getTenantIdentifierOrFail(),
+            $paymentUpdatedTransfer::class,
+        ));
+
+        $this->appPaymentToMessageBrokerFacade->sendMessage($paymentUpdatedTransfer);
     }
 
     public function sendPaymentRefundedMessage(
@@ -275,18 +217,5 @@ class MessageSender
         return array_map(static function (QuoteItemTransfer $quoteItemTransfer): ?string {
             return $quoteItemTransfer->getIdSalesOrderItem();
         }, $arrayObject->getArrayCopy());
-    }
-
-    protected function getMessageAttributes(string $tenantIdentifier, string $transferName): MessageAttributesTransfer
-    {
-        $messageAttributesTransfer = new MessageAttributesTransfer();
-        $messageAttributesTransfer
-            ->setActorId($this->appPaymentConfig->getAppIdentifier())
-            ->setEmitter($this->appPaymentConfig->getAppIdentifier())
-            ->setTenantIdentifier($tenantIdentifier)
-            ->setStoreReference($tenantIdentifier)
-            ->setTransferName($transferName);
-
-        return $messageAttributesTransfer;
     }
 }

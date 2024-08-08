@@ -1,0 +1,2 @@
+[2024-08-06T10:15:50.086670+00:00] defaultLogger.ERROR: SQLSTATE[23000]: Integrity constraint violation: 19 NOT NULL constraint failed: spy_payment_method.payment_method_name [] []
+[2024-08-06T10:21:48.002147+00:00] defaultLogger.ERROR: SQLSTATE[23000]: Integrity constraint violation: 19 NOT NULL constraint failed: spy_payment_method.payment_method_name [] []

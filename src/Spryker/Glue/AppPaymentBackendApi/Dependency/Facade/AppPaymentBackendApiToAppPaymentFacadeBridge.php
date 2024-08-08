@@ -7,6 +7,8 @@
 
 namespace Spryker\Glue\AppPaymentBackendApi\Dependency\Facade;
 
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
@@ -35,5 +37,11 @@ class AppPaymentBackendApiToAppPaymentFacadeBridge implements AppPaymentBackendA
     public function transferPayments(PaymentTransmissionsRequestTransfer $paymentTransmissionsRequestTransfer): PaymentTransmissionsResponseTransfer
     {
         return $this->appPaymentFacade->transferPayments($paymentTransmissionsRequestTransfer);
+    }
+
+    public function confirmPreOrderPayment(
+        ConfirmPreOrderPaymentRequestTransfer $confirmPreOrderPaymentRequestTransfer
+    ): ConfirmPreOrderPaymentResponseTransfer {
+        return $this->appPaymentFacade->confirmPreOrderPayment($confirmPreOrderPaymentRequestTransfer);
     }
 }

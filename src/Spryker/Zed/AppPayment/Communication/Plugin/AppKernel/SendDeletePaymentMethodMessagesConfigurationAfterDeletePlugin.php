@@ -8,13 +8,11 @@
 namespace Spryker\Zed\AppPayment\Communication\Plugin\AppKernel;
 
 use Generated\Shared\Transfer\AppConfigTransfer;
-use Spryker\Zed\AppKernelExtension\Dependency\Plugin\ConfigurationAfterSavePluginInterface;
+use Spryker\Zed\AppKernelExtension\Dependency\Plugin\ConfigurationAfterDeletePluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
  * {@inheritDoc}
- *
- * @deprecated use `\Spryker\Zed\AppPayment\Communication\Plugin\AppKernel\SendAddPaymentMethodMessagesConfigurationAfterSavePlugin` instead.
  *
  * @api
  *
@@ -22,10 +20,10 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  * @method \Spryker\Zed\AppPayment\Business\AppPaymentFacadeInterface getFacade()
  * @method \Spryker\Zed\AppPayment\Business\AppPaymentBusinessFactory getFactory()
  */
-class SendAddPaymentMethodMessageConfigurationAfterSavePlugin extends AbstractPlugin implements ConfigurationAfterSavePluginInterface
+class SendDeletePaymentMethodMessagesConfigurationAfterDeletePlugin extends AbstractPlugin implements ConfigurationAfterDeletePluginInterface
 {
-    public function afterSave(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
+    public function afterDelete(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
-        return $this->getFacade()->sendAddPaymentMethodMessage($appConfigTransfer);
+        return $this->getFacade()->deletePaymentMethods($appConfigTransfer);
     }
 }

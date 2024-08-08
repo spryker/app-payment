@@ -10,6 +10,8 @@ namespace Spryker\Zed\AppPayment\Business;
 use Generated\Shared\Transfer\AppConfigTransfer;
 use Generated\Shared\Transfer\CancelPaymentTransfer;
 use Generated\Shared\Transfer\CapturePaymentTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentCollectionDeleteCriteriaTransfer;
@@ -66,9 +68,29 @@ class AppPaymentFacade extends AbstractFacade implements AppPaymentFacadeInterfa
      *
      * @inheritDoc
      */
+    public function configurePaymentMethods(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
+    {
+        return $this->getFactory()->createPaymentMethod()->configurePaymentMethods($appConfigTransfer);
+    }
+
+    /**
+     * @api
+     *
+     * @inheritDoc
+     */
     public function sendAddPaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
-        return $this->getFactory()->createMessageSender()->sendAddPaymentMethodMessage($appConfigTransfer);
+        return $this->getFactory()->createPaymentMethod()->configurePaymentMethods($appConfigTransfer);
+    }
+
+    /**
+     * @api
+     *
+     * @inheritDoc
+     */
+    public function deletePaymentMethods(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
+    {
+        return $this->getFactory()->createPaymentMethod()->deletePaymentMethods($appConfigTransfer);
     }
 
     /**
@@ -78,7 +100,7 @@ class AppPaymentFacade extends AbstractFacade implements AppPaymentFacadeInterfa
      */
     public function sendDeletePaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
-        return $this->getFactory()->createMessageSender()->sendDeletePaymentMethodMessage($appConfigTransfer);
+        return $this->getFactory()->createPaymentMethod()->deletePaymentMethods($appConfigTransfer);
     }
 
     /**
@@ -135,5 +157,11 @@ class AppPaymentFacade extends AbstractFacade implements AppPaymentFacadeInterfa
     public function transferPayments(PaymentTransmissionsRequestTransfer $paymentTransmissionsRequestTransfer): PaymentTransmissionsResponseTransfer
     {
         return $this->getFactory()->createPayment()->transferPayments($paymentTransmissionsRequestTransfer);
+    }
+
+    public function confirmPreOrderPayment(
+        ConfirmPreOrderPaymentRequestTransfer $confirmPreOrderPaymentRequestTransfer
+    ): ConfirmPreOrderPaymentResponseTransfer {
+        return $this->getFactory()->createPayment()->confirmPreOrderPayment($confirmPreOrderPaymentRequestTransfer);
     }
 }

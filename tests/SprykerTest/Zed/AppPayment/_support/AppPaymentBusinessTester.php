@@ -26,12 +26,10 @@ use Codeception\Actor;
  * @method void pause($vars = [])
  *
  * @SuppressWarnings(PHPMD)
+ *
+ * @method \Spryker\Zed\AppPayment\Business\AppPaymentFacadeInterface getFacade(?string $moduleName = NULL)
  */
 class AppPaymentBusinessTester extends Actor
 {
     use _generated\AppPaymentBusinessTesterActions;
-
-    /**
-     * Define custom actions here
-     */
 }

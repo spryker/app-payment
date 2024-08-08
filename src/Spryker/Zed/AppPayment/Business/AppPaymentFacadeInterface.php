@@ -10,6 +10,8 @@ namespace Spryker\Zed\AppPayment\Business;
 use Generated\Shared\Transfer\AppConfigTransfer;
 use Generated\Shared\Transfer\CancelPaymentTransfer;
 use Generated\Shared\Transfer\CapturePaymentTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
+use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentCollectionDeleteCriteriaTransfer;
@@ -80,11 +82,34 @@ interface AppPaymentFacadeInterface
 
     /**
      * Specification:
+     * - Requests the `AppPaymentPaymentMethodsPlatformPluginInterface::configurePaymentMethods()` method to return a list PaymentMethods to be added.
+     * - When the passed `AppPaymentPlatformPluginInterface` is not an instance of `AppPaymentPaymentMethodsPlatformPluginInterface` it will return early.
+     * - PaymentMethods that were already added will not be added again.
+     * - PaymentMethods that were already persisted and are no longer returned from `AppPaymentPaymentMethodsPlatformPluginInterface::configurePaymentMethods()` method will be deleted and trigger a `DeletePaymentMethod` message.
+     * - PaymentMethods that were already persisted and require an update will trigger a `UpdatePaymentMethod` message.
+     *
+     * @api
+     */
+    public function configurePaymentMethods(AppConfigTransfer $appConfigTransfer): AppConfigTransfer;
+
+    /**
+     * Specification:
+     * - Requests the `AppPaymentPaymentMethodsPlatformPluginInterface::configurePaymentMethods()` method to return a list PaymentMethods to add and to delete.
+     * - When the passed `AppPaymentPlatformPluginInterface` is not an instance of `AppPaymentPaymentMethodsPlatformPluginInterface` it will return early.
+     *
+     * @api
+     */
+    public function deletePaymentMethods(AppConfigTransfer $appConfigTransfer): AppConfigTransfer;
+
+    /**
+     * Specification:
      * - Sends a `AddPaymentMethod` message when the AppConfiguration is in state NEW.
      * - Updates the AppConfiguration and sets its state to connected after the `AddPaymentMethod` message was sent.
      * - When the AppConfiguration is in state CONNECTED the `AddPaymentMethod` message will not be sent.
      *
      * @api
+     *
+     * @deprecated Use {@link \Spryker\Zed\AppPayment\Business\AppPaymentFacadeInterface::configurePaymentMethods() } instead
      */
     public function sendAddPaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer;
 
@@ -93,6 +118,8 @@ interface AppPaymentFacadeInterface
      * - Sends a `DeletePaymentMethod` message when the AppConfiguration is removed.
      *
      * @api
+     *
+     * @deprecated Use {@link \Spryker\Zed\AppPayment\Business\AppPaymentFacade::deletePaymentMethods() } instead
      */
     public function sendDeletePaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer;
 
@@ -157,4 +184,16 @@ interface AppPaymentFacadeInterface
      * @api
      */
     public function transferPayments(PaymentTransmissionsRequestTransfer $paymentTransmissionsRequestTransfer): PaymentTransmissionsResponseTransfer;
+
+    /**
+     * Specification:
+     * - Confirm a payment that was made before the order was persisted.
+     * - Loads the `AppConfigTransfer` and adds it to the ConfirmPreOrderPaymentRequestTransfer.
+     * - Returns a ConfirmPreOrderPaymentResponseTransfer.
+     *
+     * @api
+     */
+    public function confirmPreOrderPayment(
+        ConfirmPreOrderPaymentRequestTransfer $confirmPreOrderPaymentRequestTransfer
+    ): ConfirmPreOrderPaymentResponseTransfer;
 }

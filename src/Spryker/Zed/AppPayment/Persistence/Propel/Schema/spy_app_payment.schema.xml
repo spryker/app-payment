@@ -72,4 +72,22 @@
             <index-column name="order_item_ids" size="255"/>
         </index>
     </table>
+
+    <table name="spy_payment_method" idMethod="native" class="SpyPaymentRefund">
+        <column name="id_payment_method" required="true" type="INTEGER" autoIncrement="true" primaryKey="true"/>
+        <column name="tenant_identifier" type="CHAR" size="36"/>
+        <column name="name" required="true" type="VARCHAR" size="128"/>
+        <column name="provider_name" required="true" type="VARCHAR" size="128"/>
+        <column name="payment_method_app_configuration" type="LONGVARCHAR"/>
+
+        <behavior name="timestampable">
+            <parameter name="create_column" value="created_at"/>
+            <parameter name="update_column" value="updated_at"/>
+        </behavior>
+
+        <index name="spy_payment_method-index">
+            <index-column name="tenant_identifier"/>
+            <index-column name="name"/>
+        </index>
+    </table>
 </database>

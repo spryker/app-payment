@@ -39,6 +39,11 @@ class AppPaymentBackendApiHelper extends Module
         return $this->buildBackendApiUrl('private/payments/transfers');
     }
 
+    public function buildConfirmPreOrderPaymentUrl(): string
+    {
+        return $this->buildBackendApiUrl('private/confirm-pre-order-payment');
+    }
+
     /**
      * @param array<mixed>|string $params
      */

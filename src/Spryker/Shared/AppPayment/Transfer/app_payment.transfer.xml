@@ -16,8 +16,16 @@
         <property name="errorMessages" type="array" singular="errorMessage"/>
     </transfer>
 
+    <transfer name="PaymentMethodConfigurationRequest" strict="true">
+        <property name="appConfig" type="AppConfig"/>
+    </transfer>
+
+    <transfer name="PaymentMethodConfigurationResponse" strict="true">
+        <property name="paymentMethods" type="PaymentMethod[]" singular="paymentMethod"/>
+    </transfer>
+
     <transfer name="PaymentPageRequest" strict="true">
-        <property name="requestData" type="array"/>
+        <property name="requestData" type="array" singular="requestDatum"/>
         <property name="payment" type="Payment"/>
         <property name="appConfig" type="AppConfig"/>
         <property name="transactionId" type="string"/>
@@ -27,7 +35,7 @@
     <transfer name="PaymentPageResponse" strict="true">
         <property name="isSuccessful" type="bool"/>
         <property name="paymentPageTemplate" type="string"/>
-        <property name="paymentPageData" type="array"/>
+        <property name="paymentPageData" type="array" singular="paymentPageDatum"/>
     </transfer>
 
     <transfer name="InitializePaymentRequest" strict="true">
@@ -43,7 +51,23 @@
         <property name="isSuccessful" type="bool"/>
         <property name="transactionId" type="string"/>
         <property name="redirectUrl" type="string"/>
+        <property name="clientSecret" type="string"/>
         <property name="message" type="string"/>
+    </transfer>
+
+    <transfer name="ConfirmPreOrderPaymentRequest" strict="true">
+        <property name="appConfig" type="AppConfig"/>
+        <property name="payment" type="Payment"/>
+        <property name="transactionId" type="string"/>
+        <property name="tenantIdentifier" type="string"/>
+        <property name="orderReference" type="string"/>
+        <property name="paymentServiceProviderData" type="array" associative="true" singular="paymentServiceProviderDatum"/>
+    </transfer>
+
+    <transfer name="ConfirmPreOrderPaymentResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="message" type="string"/>
+        <property name="status" type="string" description="This will be set by the PSP implementation and is used to determine the Payment Status"/>
     </transfer>
 
     <transfer name="CapturePaymentRequest" strict="true">
@@ -268,6 +292,13 @@
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 
+    <transfer name="PaymentMethod" strict="true">
+        <property name="name" type="string"/>
+        <property name="providerName" type="string"/>
+        <property name="paymentMethodAppConfiguration" type="PaymentMethodAppConfiguration"/>
+        <property name="tenantIdentifier" type="string"/>
+    </transfer>
+
     <transfer name="AddPaymentMethod" strict="true">
         <property name="name" type="string"/>
         <property name="providerName" type="string"/>
@@ -276,9 +307,29 @@
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 
+    <transfer name="UpdatePaymentMethod" strict="true">
+        <property name="name" type="string"/>
+        <property name="providerName" type="string"/>
+        <property name="paymentAuthorizationEndpoint" type="string"/>
+        <property name="paymentMethodAppConfiguration" type="PaymentMethodAppConfiguration"/>
+        <property name="messageAttributes" type="MessageAttributes"/>
+    </transfer>
+
+    <transfer name="DeletePaymentMethod" strict="true">
+        <property name="name" type="string"/>
+        <property name="providerName" type="string"/>
+        <property name="messageAttributes" type="MessageAttributes"/>
+    </transfer>
+
     <transfer name="PaymentMethodAppConfiguration" strict="true">
         <property name="baseUrl" type="string"/>
         <property name="endpoints" type="Endpoint[]" singular="endpoint"/>
+        <property name="checkoutConfiguration" type="CheckoutConfiguration"/>
+    </transfer>
+
+    <transfer name="CheckoutConfiguration" strict="true">
+        <property name="strategy" type="string"/>
+        <property name="scripts" type="array" singular="script"/>
     </transfer>
 
     <transfer name="Endpoint" strict="true">
@@ -286,14 +337,13 @@
         <property name="path" type="string"/>
     </transfer>
 
-    <transfer name="DeletePaymentMethod" strict="true">
-        <property name="name" type="string"/>
-        <property name="providerName" type="string"/>
-        <property name="paymentAuthorizationEndpoint" type="string"/>
+    <transfer name="PaymentCreated" strict="true">
+        <property name="entityReference" type="string"/>
+        <property name="paymentReference" type="string"/>
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 
-    <transfer name="PaymentCreated" strict="true">
+    <transfer name="PaymentUpdated" strict="true">
         <property name="entityReference" type="string"/>
         <property name="paymentReference" type="string"/>
         <property name="messageAttributes" type="MessageAttributes"/>

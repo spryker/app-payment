@@ -47,7 +47,7 @@ class WebhookMessageSender
             PaymentStatus::STATUS_CAPTURED => $this->messageSender->sendPaymentCapturedMessage($paymentTransfer),
             PaymentStatus::STATUS_CAPTURE_FAILED => $this->messageSender->sendPaymentCaptureFailedMessage($paymentTransfer),
             PaymentStatus::STATUS_AUTHORIZED => $this->messageSender->sendPaymentAuthorizedMessage($paymentTransfer),
-            PaymentStatus::STATUS_AUTHORIZATION_FAILED => $this->messageSender->sendPaymentPreAuthorizationFailedMessage($paymentTransfer),
+            PaymentStatus::STATUS_AUTHORIZATION_FAILED => $this->messageSender->sendPaymentAuthorizationFailedMessage($paymentTransfer),
             default => $this->getLogger()->warning(sprintf('Unhandled payment status "%s" for orderReference "%s" and tenantIdentifier "%s".', $paymentStatus, $paymentTransfer->getOrderReferenceOrFail(), $paymentTransfer->getTenantIdentifierOrFail()), [
                 PaymentTransfer::TRANSACTION_ID => $paymentTransfer->getTransactionIdOrFail(),
                 PaymentTransfer::TENANT_IDENTIFIER => $paymentTransfer->getTenantIdentifierOrFail(),

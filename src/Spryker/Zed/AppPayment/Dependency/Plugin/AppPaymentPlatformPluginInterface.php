@@ -28,7 +28,8 @@ interface AppPaymentPlatformPluginInterface
      *   - `InitializePaymentRequestTransfer::orderData` (QuoteTransfer)
      *   - `InitializePaymentRequestTransfer::QuoteTransfer::currencyCode`
      *   - `InitializePaymentRequestTransfer::QuoteTransfer::grandTotal`
-     *   - `InitializePaymentRequestTransfer::QuoteTransfer::orderReference`
+     *   - `InitializePaymentRequestTransfer::QuoteTransfer::orderReference` (optional: not required for pre-order payments) Connection happens through
+     *      the `AppPreOrderPaymentPlatformPluginInterface` for pre-order payments when the PSP supports this functionality.
      * - Returns a `InitializePaymentResponseTransfer`.
      * - Requires `InitializePaymentResponseTransfer::isSuccessful`to be set.
      * - Requires `InitializePaymentResponseTransfer::message` to be set when the 3rd party provider could not process the request.

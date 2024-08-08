@@ -20,8 +20,14 @@ suites:
             enabled:
                 - \SprykerTest\Shared\Testify\Helper\ConfigHelper
                 - \SprykerTest\Zed\Testify\Helper\Business\BusinessHelper
+                - \SprykerTest\Zed\Testify\Helper\Business\DependencyProviderHelper
+                - \SprykerTest\Shared\Testify\Helper\DependencyHelper
+                - \SprykerTest\Shared\AppKernel\Helper\AppConfigHelper
+                - \SprykerTest\Shared\AppPayment\Helper\AppPaymentHelper
+                - \SprykerTest\Zed\MessageBroker\Helper\InMemoryMessageBrokerHelper
                 - \SprykerTest\Shared\Propel\Helper\TransactionHelper
                 - \SprykerTest\Shared\AppPayment\Helper\AppPaymentHelper
+                - \SprykerTest\Shared\AppPayment\Helper\AppPaymentMethodHelper
                 - \SprykerTest\Shared\Testify\Helper\DataCleanupHelper
 
     Communication:

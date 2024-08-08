@@ -30,6 +30,8 @@ use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformPluginInterface;
  * @method void pause($vars = [])
  *
  * @SuppressWarnings(PHPMD)
+ *
+ * @method \Spryker\Zed\AppPayment\Business\AppPaymentFacadeInterface getFacade()
  */
 class AppPaymentAsyncApiTester extends Actor
 {

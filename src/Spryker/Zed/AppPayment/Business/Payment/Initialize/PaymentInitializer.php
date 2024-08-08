@@ -55,7 +55,9 @@ class PaymentInitializer
             return $initializePaymentResponseTransfer;
         }
 
-        $initializePaymentResponseTransfer = $this->addRedirectUrl($initializePaymentRequestTransfer, $initializePaymentResponseTransfer);
+        if ($initializePaymentRequestTransfer->getOrderData()->getOrderReference()) {
+            $initializePaymentResponseTransfer = $this->addRedirectUrl($initializePaymentRequestTransfer, $initializePaymentResponseTransfer);
+        }
 
         /** @phpstan-var \Generated\Shared\Transfer\InitializePaymentResponseTransfer */
         return $this->getTransactionHandler()->handleTransaction(function () use ($initializePaymentRequestTransfer, $initializePaymentResponseTransfer) {
@@ -98,8 +100,8 @@ class PaymentInitializer
         $paymentTransfer
             ->fromArray($initializePaymentResponseTransfer->toArray(), true)
             ->setTransactionId($initializePaymentResponseTransfer->getTransactionIdOrFail())
-            ->setTenantIdentifier($initializePaymentRequestTransfer->getTenantIdentifier())
-            ->setOrderReference($quoteTransfer->getOrderReference())
+            ->setTenantIdentifier($initializePaymentRequestTransfer->getTenantIdentifierOrFail())
+            ->setOrderReference($quoteTransfer->getOrderReference()) // Optional for the pre-order payment case.
             ->setQuote($quoteTransfer)
             ->setRedirectSuccessUrl($initializePaymentRequestTransfer->getRedirectSuccessUrl())
             ->setRedirectCancelUrl($initializePaymentRequestTransfer->getRedirectCancelUrl())

@@ -14,18 +14,16 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * {@inheritDoc}
  *
- * @deprecated use `\Spryker\Zed\AppPayment\Communication\Plugin\AppKernel\SendAddPaymentMethodMessagesConfigurationAfterSavePlugin` instead.
- *
  * @api
  *
  * @method \Spryker\Zed\AppPayment\AppPaymentConfig getConfig()
  * @method \Spryker\Zed\AppPayment\Business\AppPaymentFacadeInterface getFacade()
  * @method \Spryker\Zed\AppPayment\Business\AppPaymentBusinessFactory getFactory()
  */
-class SendAddPaymentMethodMessageConfigurationAfterSavePlugin extends AbstractPlugin implements ConfigurationAfterSavePluginInterface
+class ConfigurePaymentMethodsConfigurationAfterSavePlugin extends AbstractPlugin implements ConfigurationAfterSavePluginInterface
 {
     public function afterSave(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
-        return $this->getFacade()->sendAddPaymentMethodMessage($appConfigTransfer);
+        return $this->getFacade()->configurePaymentMethods($appConfigTransfer);
     }
 }

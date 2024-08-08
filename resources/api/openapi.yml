@@ -25,11 +25,11 @@ paths:
             x-spryker:
                 module: PaymentBackendApi
                 controller: InitializePaymentResourceController
-            summary: 'Receives webhooks initialized by a third party provider.'
+            summary: 'Initializes a payment with a third party provider.'
             parameters:
                 - $ref: '#/components/parameters/tenantIdentifier'
             requestBody:
-                description: 'Provides order data.'
+                description: 'Provides Order Data (incl. orderReference) or Quote Data (excl. orderReference).'
                 required: true
                 content:
                     # SCOS tenants are NOT sending this as JSON, but as form data!
@@ -53,6 +53,68 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InitializePaymentResponse'
+                400:
+                    description: 'Bad request.'
+                default:
+                    description: 'Expected response to a bad request.'
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+
+    '/private/confirm-pre-order-payment':
+        post:
+            x-spryker:
+                module: PaymentBackendApi
+                controller: ConfirmPreOrderPaymentResourceController
+            summary: 'Confirms a Pre-Order Payment (Payment Initialized without an orderReference before the order was persisted) and connects the payment with an order.'
+            parameters:
+                - $ref: '#/components/parameters/tenantIdentifier'
+            requestBody:
+                description: 'PSP data object that enables the connection between the payment that currently does not have an orderReference yet.'
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ConfirmPreOrderPaymentRequest'
+            responses:
+                200:
+                    description: 'Expected response to a valid request.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConfirmPreOrderPaymentResponse'
+                400:
+                    description: 'Bad request.'
+                default:
+                    description: 'Expected response to a bad request.'
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+
+    '/private/checkout-session':
+        post:
+            x-spryker:
+                module: PaymentBackendApi
+                controller: CheckoutSessionResourceController
+            summary: 'Initializes a Checkout Session with the PSP (NOT IMPLEMENTED).'
+            parameters:
+                - $ref: '#/components/parameters/tenantIdentifier'
+            requestBody:
+                description: 'Provides Quote Data.'
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CheckoutSessionRequest'
+            responses:
+                200:
+                    description: 'Expected response to a valid request.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CheckoutSessionResponse'
                 400:
                     description: 'Bad request.'
                 default:
@@ -105,6 +167,8 @@ components:
                 message:
                     type: string
                     nullable: true
+                clientSecret:
+                    type: string
 
         InitializePaymentRequest:
             type: object
@@ -169,7 +233,7 @@ components:
                             type: object
                             additionalProperties:
                                 type: string
-                            description: Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/
+                            description: 'Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/'
                             example:
                                 internalId: '#061280'
                                 externalId: '#061114'
@@ -186,6 +250,105 @@ components:
                     description: 'Provides checkout summary page URL.'
                     type: string
                     example: 'https://example.com/summary'
+
+        ConfirmPreOrderPaymentRequest:
+            type: object
+            required:
+                - orderReference
+                - paymentServiceProviderData
+            properties:
+                orderReference:
+                    type: string
+                    example: 'DE-123456'
+                paymentServiceProviderData:
+                    description: 'Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/'
+                    type: string
+                    additionalProperties:
+                        type: string
+                    example:
+                        internalId: '#061280'
+                        externalId: '#061114'
+
+        ConfirmPreOrderPaymentResponse:
+            properties:
+                isSuccessful:
+                    type: boolean
+                message:
+                    description: 'Message in case of failure to know the issue on the Tenant side.'
+                    type: string
+                    nullable: true
+
+        CheckoutSessionRequest:
+            type: object
+            required:
+                - orderData
+            properties:
+                orderData:
+                    description: 'Order data.'
+                    type: object
+                    required:
+                        - localeName
+                        - countryCode
+                        - customerFirstName
+                        - customerLastName
+                        - currencyCode
+                        - grandTotal
+                        - paymentMethod
+                        - items
+                    properties:
+                        storeName:
+                            type: string
+                            example: 'DE'
+                        localeName:
+                            type: string
+                            enum:
+                                - en_US
+                                - de_DE
+                        countryCode:
+                            type: string
+                            example: 'DE'
+                        customerFirstName:
+                            type: string
+                            example: 'John'
+                        customerLastName:
+                            type: string
+                            example: 'McClane'
+                        currencyCode:
+                            type: string
+                            example: 'EUR'
+                        grandTotal:
+                            type: integer
+                            example: 10000
+                            description: 'Total in lowest denominator (cents)'
+                        paymentMethod:
+                            type: string
+                            enum:
+                                - 'Credit Card'
+                                - 'PayPal'
+                        items:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/QuoteItem'
+                            minItems: 1
+                        additionalPaymentData:
+                            type: object
+                            additionalProperties:
+                                type: string
+                            description: Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/
+                            example:
+                                internalId: '#061280'
+                                externalId: '#061114'
+
+        CheckoutSessionResponse:
+            properties:
+                isSuccessful:
+                    type: boolean
+                redirectUrl:
+                    type: string
+                    description: 'URL for payment authorization'
+                message:
+                    type: string
+                    nullable: true
 
         QuoteItem:
             type: object

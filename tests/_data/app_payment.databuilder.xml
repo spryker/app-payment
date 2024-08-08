@@ -32,6 +32,11 @@
         <property name="paymentMethod" dataBuilderRule="=PayPal"/>
     </transfer>
 
+    <transfer name="PaymentMethod" strict="true">
+        <property name="name" dataBuilderRule="word()"/>
+        <property name="providerName" dataBuilderRule="word()"/>
+    </transfer>
+
     <transfer name="QuoteItem" strict="true">
         <property name="name" dataBuilderRule="word()"/>
     </transfer>
@@ -125,13 +130,23 @@
         <property name="paymentAuthorizationEndpoint" dataBuilderRule="word()"/>
     </transfer>
 
-    <transfer name="DeletePaymentMethod" strict="true">
+    <transfer name="UpdatePaymentMethod" strict="true">
         <property name="name" dataBuilderRule="word()"/>
         <property name="providerName" dataBuilderRule="word()"/>
         <property name="paymentAuthorizationEndpoint" dataBuilderRule="word()"/>
     </transfer>
 
+    <transfer name="DeletePaymentMethod" strict="true">
+        <property name="name" dataBuilderRule="word()"/>
+        <property name="providerName" dataBuilderRule="word()"/>
+    </transfer>
+
     <transfer name="PaymentCreated" strict="true">
+        <property name="entityReference" dataBuilderRule="unique()->uuid()"/>
+        <property name="paymentReference" dataBuilderRule="unique()->uuid()"/>
+    </transfer>
+
+    <transfer name="PaymentUpdated" strict="true">
         <property name="entityReference" dataBuilderRule="unique()->uuid()"/>
         <property name="paymentReference" dataBuilderRule="unique()->uuid()"/>
     </transfer>
