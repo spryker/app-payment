@@ -180,6 +180,46 @@ class CancelPreOrderPaymentApiTest extends Unit
         $this->tester->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
     }
 
+    public function testCancelPreOrderPaymentPostRequestReturnsHttpResponseCode422WhenTheValidationOfTheRequestFailsinThePluginImplementation(): void
+    {
+        // Arrange
+        $transactionId = Uuid::uuid4()->toString();
+
+        $cancelPreOrderPaymentRequestTransfer = $this->tester->haveCancelPreOrderPaymentRequestTransfer([
+            CancelPreOrderPaymentRequestTransfer::TRANSACTION_ID => $transactionId,
+        ]);
+
+        $this->tester->haveAppConfigForTenant($cancelPreOrderPaymentRequestTransfer->getTenantIdentifier());
+        $this->tester->havePaymentForTransactionId($cancelPreOrderPaymentRequestTransfer->getTransactionId(), $cancelPreOrderPaymentRequestTransfer->getTenantIdentifier());
+
+        $cancelPreOrderPaymentResponseTransfer = new CancelPreOrderPaymentResponseTransfer();
+        $cancelPreOrderPaymentResponseTransfer
+            ->setIsSuccessful(false)
+            ->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->setMessage('Payment cancellation failed');
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformCancelPreOrderPluginInterface::class, [
+            'cancelPreOrderPayment' => function (CancelPreOrderPaymentRequestTransfer $cancelPreOrderPaymentRequestTransfer) use ($cancelPreOrderPaymentResponseTransfer) {
+                // Ensure that the AppConfig is always passed to the platform plugin.
+                $this->assertInstanceOf(AppConfigTransfer::class, $cancelPreOrderPaymentRequestTransfer->getAppConfig());
+                $this->assertInstanceOf(PaymentTransfer::class, $cancelPreOrderPaymentRequestTransfer->getPayment());
+
+                return $cancelPreOrderPaymentResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        // Act
+        $this->tester->addHeader(GlueRequestPaymentMapper::HEADER_TENANT_IDENTIFIER, $cancelPreOrderPaymentRequestTransfer->getTenantIdentifier());
+        $this->tester->addHeader('Content-Type', 'application/json');
+
+        $this->tester->sendPost($this->tester->buildCancelPreOrderPaymentUrl(), $cancelPreOrderPaymentRequestTransfer->toArray());
+
+        // Assert
+        $this->tester->seeResponseCodeIs(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
     public function testCancelPreOrderPaymentPostRequestReturnsHttpResponseCode400WhenThePaymentPlatformImplemtationThrowsAnException(): void
     {
         // Arrange

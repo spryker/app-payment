@@ -49,6 +49,11 @@ class AppPaymentBackendApiHelper extends Module
         return $this->buildBackendApiUrl('private/cancel-pre-order-payment');
     }
 
+    public function buildCustomerUrl(): string
+    {
+        return $this->buildBackendApiUrl('private/customer');
+    }
+
     /**
      * @param array<mixed>|string $params
      */

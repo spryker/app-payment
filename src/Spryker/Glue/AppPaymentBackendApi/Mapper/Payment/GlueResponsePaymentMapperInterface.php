@@ -9,6 +9,7 @@ namespace Spryker\Glue\AppPaymentBackendApi\Mapper\Payment;
 
 use Generated\Shared\Transfer\CancelPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
+use Generated\Shared\Transfer\CustomerResponseTransfer;
 use Generated\Shared\Transfer\GlueResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsResponseTransfer;
@@ -29,5 +30,9 @@ interface GlueResponsePaymentMapperInterface
 
     public function mapCancelPreOrderPaymentResponseTransferToSingleResourceGlueResponseTransfer(
         CancelPreOrderPaymentResponseTransfer $cancelPreOrderPaymentResponseTransfer
+    ): GlueResponseTransfer;
+
+    public function mapCustomerResponseTransferToSingleResourceGlueResponseTransfer(
+        CustomerResponseTransfer $customerResponseTransfer
     ): GlueResponseTransfer;
 }

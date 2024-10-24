@@ -8,6 +8,7 @@
 namespace Spryker\Zed\AppPayment\Business;
 
 use Spryker\Zed\AppPayment\AppPaymentDependencyProvider;
+use Spryker\Zed\AppPayment\Business\Customer\Customer;
 use Spryker\Zed\AppPayment\Business\MessageBroker\CancelPaymentMessageHandler;
 use Spryker\Zed\AppPayment\Business\MessageBroker\CancelPaymentMessageHandlerInterface;
 use Spryker\Zed\AppPayment\Business\MessageBroker\CapturePaymentMessageHandler;
@@ -22,6 +23,7 @@ use Spryker\Zed\AppPayment\Business\Payment\Initialize\PaymentInitializer;
 use Spryker\Zed\AppPayment\Business\Payment\Message\MessageSender;
 use Spryker\Zed\AppPayment\Business\Payment\Message\PaymentMethodMessageSender;
 use Spryker\Zed\AppPayment\Business\Payment\Method\PaymentMethod;
+use Spryker\Zed\AppPayment\Business\Payment\Method\Reader\PaymentMethodReader;
 use Spryker\Zed\AppPayment\Business\Payment\Page\PaymentPage;
 use Spryker\Zed\AppPayment\Business\Payment\Payment;
 use Spryker\Zed\AppPayment\Business\Payment\PreOrder\PaymentPreOrder;
@@ -57,6 +59,8 @@ class AppPaymentBusinessFactory extends AbstractBusinessFactory
             $this->createPaymentPreOrder(),
             $this->createPaymentTransfer(),
             $this->createPaymentPage(),
+            $this->createPaymentMethodReader(),
+            $this->createCustomer(),
             $this->createWebhookHandler(),
         );
     }
@@ -266,5 +270,15 @@ class AppPaymentBusinessFactory extends AbstractBusinessFactory
     public function createRedirect(): Redirect
     {
         return new Redirect($this->getPlatformPlugin(), $this->getRepository(), $this->getConfig(), $this->createAppConfigLoader());
+    }
+
+    public function createPaymentMethodReader(): PaymentMethodReader
+    {
+        return new PaymentMethodReader($this->getRepository());
+    }
+
+    public function createCustomer(): Customer
+    {
+        return new Customer($this->getPlatformPlugin(), $this->createAppConfigLoader());
     }
 }

@@ -9,9 +9,11 @@ namespace SprykerTest\Zed\AppPayment\Business;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\PaymentCollectionDeleteCriteriaTransfer;
+use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
 use Ramsey\Uuid\Uuid;
 use Spryker\Shared\Kernel\Transfer\Exception\NullValueException;
+use Spryker\Zed\AppPayment\Business\Exception\PaymentMethodNotFoundException;
 use SprykerTest\Zed\AppPayment\AppPaymentBusinessTester;
 
 /**
@@ -71,5 +73,43 @@ class PaymentFacadeTest extends Unit
         // Act
         $this->tester->getFacade()
             ->deletePaymentCollection($paymentCollectionDeleteCriteriaTransfer);
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetPaymentMethodByTenantIdentifierAndPaymentMethodKeyReturnsPaymentMethodTransfer(): void
+    {
+        // Arrange
+        $tenantIdentifier = Uuid::uuid4()->toString();
+        $paymentMethodKey = 'test-payment-method-key';
+
+        $this->tester->havePaymentMethodPersisted([
+            PaymentMethodTransfer::TENANT_IDENTIFIER => $tenantIdentifier,
+            PaymentMethodTransfer::PAYMENT_METHOD_KEY => $paymentMethodKey,
+        ]);
+
+        // Act
+        $paymentMethodTransfer = $this->tester->getFacade()->getPaymentMethodByTenantIdentifierAndPaymentMethodKey($tenantIdentifier, $paymentMethodKey);
+
+        // Assert
+        $this->assertInstanceOf(PaymentMethodTransfer::class, $paymentMethodTransfer);
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetPaymentMethodByTenantIdentifierAndPaymentMethodKeyThrowsExceptionWhenPaymentMethodNotFound(): void
+    {
+        // Arrange
+        $tenantIdentifier = Uuid::uuid4()->toString();
+        $paymentMethodKey = 'test-payment-method-key';
+
+        // Expext
+        $this->expectException(PaymentMethodNotFoundException::class);
+        $this->expectExceptionMessage(sprintf('Payment method "%s" not found for Tenant "%s"', $paymentMethodKey, $tenantIdentifier));
+
+        // Act
+        $this->tester->getFacade()->getPaymentMethodByTenantIdentifierAndPaymentMethodKey($tenantIdentifier, $paymentMethodKey);
     }
 }

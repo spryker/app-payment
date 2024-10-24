@@ -14,11 +14,14 @@ use Generated\Shared\Transfer\CancelPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\CapturePaymentTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
+use Generated\Shared\Transfer\CustomerRequestTransfer;
+use Generated\Shared\Transfer\CustomerResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\PaymentCollectionTransfer;
 use Generated\Shared\Transfer\PaymentCriteriaTransfer;
+use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\PaymentPageRequestTransfer;
 use Generated\Shared\Transfer\PaymentPageResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
@@ -228,4 +231,24 @@ interface AppPaymentFacadeInterface
     public function cancelPreOrderPayment(
         CancelPreOrderPaymentRequestTransfer $cancelPreOrderPaymentRequestTransfer
     ): CancelPreOrderPaymentResponseTransfer;
+
+    /**
+     * Specification:
+     * - Loads the payment method by the tenant identifier and payment method key.
+     * - Returns a PaymentMethodTransfer
+     *
+     * @api
+     */
+    public function getPaymentMethodByTenantIdentifierAndPaymentMethodKey(string $tenantIdentifier, string $paymentMethodKey): PaymentMethodTransfer;
+
+    /**
+     * Specification:
+     * - Loads the `AppConfigTransfer` and adds it to the CustomerRequestTransfer.
+     * - Returns a CustomerResponseTransfer.
+     *
+     * @api
+     */
+    public function customer(
+        CustomerRequestTransfer $customerRequestTransfer
+    ): CustomerResponseTransfer;
 }

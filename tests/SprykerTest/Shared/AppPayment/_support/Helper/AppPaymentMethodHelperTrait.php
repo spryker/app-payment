@@ -11,7 +11,7 @@ use Codeception\Module;
 
 trait AppPaymentMethodHelperTrait
 {
-    protected function getPaymentMethodHelper(): AppPaymentHelper
+    protected function getPaymentMethodHelper(): AppPaymentMethodHelper
     {
         /** @var \SprykerTest\Shared\AppPayment\Helper\AppPaymentMethodHelper $paymentMethodHelper */
         $paymentMethodHelper = $this->getModule('\\' . AppPaymentMethodHelper::class);

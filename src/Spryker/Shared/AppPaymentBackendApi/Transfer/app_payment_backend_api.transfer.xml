@@ -5,6 +5,9 @@
     </transfer>
 
     <transfer name="InitializePaymentResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="statusCode" type="int"/>
+        <property name="message" type="string"/>
     </transfer>
 
     <transfer name="ConfirmPreOrderPaymentRequest" strict="true">
@@ -16,6 +19,7 @@
 
     <transfer name="ConfirmPreOrderPaymentResponse" strict="true">
         <property name="isSuccessful" type="bool"/>
+        <property name="statusCode" type="int"/>
         <property name="message" type="string"/>
     </transfer>
 
@@ -29,6 +33,7 @@
 
     <transfer name="CancelPreOrderPaymentResponse" strict="true">
         <property name="isSuccessful" type="bool"/>
+        <property name="statusCode" type="int"/>
         <property name="message" type="string"/>
     </transfer>
 
@@ -59,6 +64,8 @@
     </transfer>
 
     <transfer name="PaymentTransmissionsResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="statusCode" type="int"/>
         <property name="message" type="string"/>
         <property name="paymentTransmissions" type="PaymentTransmission[]" singular="paymentTransmission"/>
     </transfer>
@@ -99,6 +106,18 @@
     </transfer>
 
     <transfer name="WebhookResponse" strict="true">
+    </transfer>
+
+    <transfer name="CustomerRequest" strict="true">
+        <property name="customer" type="Customer"/>
+        <property name="customerPaymentServiceProviderData" type="array"/>
+    </transfer>
+
+    <transfer name="CustomerResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="statusCode" type="int"/>
+        <property name="message" type="string"/>
+        <property name="customer" type="Customer"/>
     </transfer>
 
 </transfers>

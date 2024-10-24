@@ -306,6 +306,13 @@ class PaymentMethod
 
         $paymentMethodAppConfigurationTransfer->addEndpoint($transferEndpointTransfer);
 
+        $transferEndpointTransfer = new EndpointTransfer();
+        $transferEndpointTransfer
+            ->setName('customer')
+            ->setPath('/private/customer'); // Defined in app_payment_openapi.yml
+
+        $paymentMethodAppConfigurationTransfer->addEndpoint($transferEndpointTransfer);
+
         return $paymentMethodAppConfigurationTransfer;
     }
 }

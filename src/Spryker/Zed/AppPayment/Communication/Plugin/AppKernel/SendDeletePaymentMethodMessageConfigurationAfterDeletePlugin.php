@@ -14,6 +14,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * {@inheritDoc}
  *
+ * @codeCoverageIgnore This plugin is deprecated and will be removed in the next major.
  * @deprecated Use `\Spryker\Zed\AppPayment\Communication\Plugin\AppKernel\SendDeletePaymentMethodMessagesConfigurationAfterDeletePlugin` instead.
  *
  * @api

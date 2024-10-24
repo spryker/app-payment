@@ -9,6 +9,7 @@ namespace Spryker\Glue\AppPaymentBackendApi\Mapper\Payment;
 
 use Generated\Shared\Transfer\CancelPreOrderPaymentRequestTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
+use Generated\Shared\Transfer\CustomerRequestTransfer;
 use Generated\Shared\Transfer\GlueRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
@@ -30,4 +31,8 @@ interface GlueRequestPaymentMapperInterface
     public function mapGlueRequestTransferToCancelPreOrderPaymentRequestTransfer(
         GlueRequestTransfer $glueRequestTransfer
     ): CancelPreOrderPaymentRequestTransfer;
+
+    public function mapGlueRequestTransferToCustomerRequestTransfer(
+        GlueRequestTransfer $glueRequestTransfer
+    ): CustomerRequestTransfer;
 }

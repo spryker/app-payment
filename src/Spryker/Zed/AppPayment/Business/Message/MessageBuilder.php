@@ -7,6 +7,8 @@
 
 namespace Spryker\Zed\AppPayment\Business\Message;
 
+use Generated\Shared\Transfer\CustomerRequestTransfer;
+
 class MessageBuilder
 {
     public static function paymentByTransactionIdNotFound(string $transactionId): string
@@ -42,6 +44,16 @@ class MessageBuilder
     public static function getPlatformPluginDoesNotProvideMarketplaceFeatures(): string
     {
         return 'Platform plugin does not provide Marketplace features';
+    }
+
+    public static function getPlatformPluginDoesNotProvideCustomerFeatures(): string
+    {
+        return 'Platform plugin does not provide Customer features';
+    }
+
+    public static function getNeitherACustomerNorCustomerPaymentProviderDataIsPresent(): string
+    {
+        return sprintf('Neither a `%1$s.%2$s` nor `%1$s.%3$s` is present. Depending on your use case you must at least provide one of them.', CustomerRequestTransfer::class, CustomerRequestTransfer::CUSTOMER, CustomerRequestTransfer::CUSTOMER_PAYMENT_SERVICE_PROVIDER_DATA);
     }
 
     public static function paymentByTenantIdentifierAndOrderReferenceNotFound(string $tenantIdentifier, string $orderReference): string

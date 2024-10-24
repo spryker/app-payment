@@ -10,6 +10,7 @@ namespace Spryker\Glue\AppPaymentBackendApi\Mapper\Payment;
 use ArrayObject;
 use Generated\Shared\Transfer\CancelPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
+use Generated\Shared\Transfer\CustomerResponseTransfer;
 use Generated\Shared\Transfer\GlueErrorTransfer;
 use Generated\Shared\Transfer\GlueResourceTransfer;
 use Generated\Shared\Transfer\GlueResponseTransfer;
@@ -24,6 +25,18 @@ class GlueResponsePaymentMapper implements GlueResponsePaymentMapperInterface
     ): GlueResponseTransfer {
         $glueResponseTransfer = new GlueResponseTransfer();
 
+        if ($initializePaymentResponseTransfer->getIsSuccessful() === false) {
+            $glueResponseTransfer->setHttpStatus($initializePaymentResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
+
+            if ($initializePaymentResponseTransfer->getMessage() !== null && $initializePaymentResponseTransfer->getMessage() !== '' && $initializePaymentResponseTransfer->getMessage() !== '0') {
+                $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
+                    $initializePaymentResponseTransfer->getMessage(),
+                ));
+            }
+
+            return $glueResponseTransfer;
+        }
+
         return $this->addInitializePaymentResponseTransferToGlueResponse($initializePaymentResponseTransfer, $glueResponseTransfer);
     }
 
@@ -33,7 +46,7 @@ class GlueResponsePaymentMapper implements GlueResponsePaymentMapperInterface
         $glueResponseTransfer = new GlueResponseTransfer();
 
         if ($paymentTransmissionsResponseTransfer->getIsSuccessful() === false) {
-            $glueResponseTransfer->setHttpStatus(Response::HTTP_BAD_REQUEST);
+            $glueResponseTransfer->setHttpStatus($paymentTransmissionsResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
             $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
                 $paymentTransmissionsResponseTransfer->getMessageOrFail(),
             ));
@@ -58,7 +71,7 @@ class GlueResponsePaymentMapper implements GlueResponsePaymentMapperInterface
         $glueResponseTransfer->setHttpStatus(Response::HTTP_OK);
 
         if ($confirmPreOrderPaymentResponseTransfer->getIsSuccessful() === false) {
-            $glueResponseTransfer->setHttpStatus(Response::HTTP_BAD_REQUEST);
+            $glueResponseTransfer->setHttpStatus($confirmPreOrderPaymentResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
             $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
                 $confirmPreOrderPaymentResponseTransfer->getMessageOrFail(),
             ));
@@ -74,11 +87,33 @@ class GlueResponsePaymentMapper implements GlueResponsePaymentMapperInterface
         $glueResponseTransfer->setHttpStatus(Response::HTTP_OK);
 
         if ($cancelPreOrderPaymentResponseTransfer->getIsSuccessful() === false) {
-            $glueResponseTransfer->setHttpStatus(Response::HTTP_BAD_REQUEST);
+            $glueResponseTransfer->setHttpStatus($cancelPreOrderPaymentResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
             $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
                 $cancelPreOrderPaymentResponseTransfer->getMessageOrFail(),
             ));
         }
+
+        return $glueResponseTransfer;
+    }
+
+    public function mapCustomerResponseTransferToSingleResourceGlueResponseTransfer(
+        CustomerResponseTransfer $customerResponseTransfer
+    ): GlueResponseTransfer {
+        $glueResponseTransfer = new GlueResponseTransfer();
+        $glueResponseTransfer->setHttpStatus(Response::HTTP_OK);
+
+        if ($customerResponseTransfer->getIsSuccessful() === false) {
+            $glueResponseTransfer->setHttpStatus($customerResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
+            $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
+                $customerResponseTransfer->getMessageOrFail(),
+            ));
+
+            return $glueResponseTransfer;
+        }
+
+        $glueResponseTransfer->setContent(
+            (string)json_encode($customerResponseTransfer->toArray(true, true)),
+        );
 
         return $glueResponseTransfer;
     }

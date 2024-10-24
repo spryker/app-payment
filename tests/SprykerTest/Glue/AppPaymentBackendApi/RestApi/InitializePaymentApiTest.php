@@ -164,7 +164,7 @@ class InitializePaymentApiTest extends Unit
         $this->tester->assertSamePaymentQuoteAndRequestQuote($transactionId, $initializePaymentRequestTransfer->getOrderData());
     }
 
-    public function testInitializePaymentPostRequestReturnsHttpResponseCode200WhenAnExceptionOccurs(): void
+    public function testInitializePaymentPostRequestReturnsHttpResponseCode400WhenAnExceptionOccurs(): void
     {
         // Arrange
         $initializePaymentRequestTransfer = $this->tester->haveInitializePaymentRequestTransfer();
@@ -185,10 +185,44 @@ class InitializePaymentApiTest extends Unit
         $this->tester->sendPost($url, [RequestOptions::FORM_PARAMS => $initializePaymentRequestTransfer->toArray()]);
 
         // Assert
-        $this->tester->seeResponseCodeIs(Response::HTTP_OK);
+        $this->tester->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
     }
 
-    public function testInitializePaymentPostRequestReturnsHttpResponseCode200WhenPlatformPaymentInitializationFailed(): void
+    public function testInitializePaymentPostRequestReturnsHttpResponseCode422WhenTheValidationInThePluginImplementationFails(): void
+    {
+        // Arrange
+        $transactionId = Uuid::uuid4()->toString();
+
+        $initializePaymentRequestTransfer = $this->tester->haveInitializePaymentRequestTransfer();
+        $this->tester->haveAppConfigForTenant($initializePaymentRequestTransfer->getTenantIdentifier());
+
+        $url = $this->tester->buildPaymentUrl();
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformPluginInterface::class, [
+            'initializePayment' => static function (): InitializePaymentResponseTransfer {
+                $initializePaymentResponseTransfer = new InitializePaymentResponseTransfer();
+                $initializePaymentResponseTransfer
+                    ->setIsSuccessful(false)
+                    ->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+                    ->setMessage('Validation failed in the platform plugin.');
+
+                return $initializePaymentResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        // Act
+        $this->tester->addHeader(GlueRequestPaymentMapper::HEADER_TENANT_IDENTIFIER, $initializePaymentRequestTransfer->getTenantIdentifier());
+        $this->tester->addHeader('Content-Type', 'application/json');
+
+        $this->tester->sendPost($url, [RequestOptions::FORM_PARAMS => $initializePaymentRequestTransfer->toArray()]);
+
+        // Assert
+        $this->tester->seeResponseCodeIs(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testInitializePaymentPostRequestReturnsHttpResponseCode400WhenPlatformPaymentInitializationFailed(): void
     {
         // Arrange
         $initializePaymentRequestTransfer = $this->tester->haveInitializePaymentRequestTransfer();
@@ -211,7 +245,7 @@ class InitializePaymentApiTest extends Unit
         $this->tester->sendPost($this->tester->buildPaymentUrl(), [RequestOptions::FORM_PARAMS => $initializePaymentRequestTransfer->toArray()]);
 
         // Assert
-        $this->tester->seeResponseCodeIs(Response::HTTP_OK);
+        $this->tester->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
     }
 
     public function testInitializePaymentPostRequestReturnsHttpResponseWithErrorMessageWhenAnExceptionOccurs(): void
@@ -231,12 +265,11 @@ class InitializePaymentApiTest extends Unit
 
         // Act
         $this->tester->addHeader(GlueRequestPaymentMapper::HEADER_TENANT_IDENTIFIER, $initializePaymentRequestTransfer->getTenantIdentifier());
-        $this->tester->addHeader('Content-Type', 'application/json');
 
         $response = $this->tester->sendPost($url, [RequestOptions::FORM_PARAMS => $initializePaymentRequestTransfer->toArray()]);
 
         // Assert
-        $this->tester->seeResponseCodeIs(Response::HTTP_OK);
-        $this->tester->assertResponseHasErrorMessage($response, 'An Error occurred in the platform plugin.');
+        $this->tester->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
+        $this->tester->seeResponseContainsErrorMessage('An Error occurred in the platform plugin.');
     }
 }

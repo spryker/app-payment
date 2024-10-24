@@ -17,6 +17,7 @@ use Spryker\Zed\AppPayment\AppPaymentDependencyProvider;
 use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformPluginInterface;
 use SprykerTest\Shared\Testify\Helper\DependencyHelperTrait;
 use SprykerTest\Zed\AppPayment\AppPaymentCommunicationTester;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Auto-generated group annotations
@@ -34,6 +35,34 @@ class RedirectControllerTest extends Unit
     use DependencyHelperTrait;
 
     protected AppPaymentCommunicationTester $tester;
+
+    public function testGivenNoTransactionIdWhenICallTheContollerThenIGetA400BadRequestResponse(): void
+    {
+        $tenantIdentifier = Uuid::uuid4()->toString();
+        $transactionId = Uuid::uuid4()->toString();
+
+        $this->tester->haveAppConfigForTenant($tenantIdentifier);
+        $paymentTransfer = $this->tester->havePaymentForTransactionId($transactionId, $tenantIdentifier);
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformPluginInterface::class, [
+            'getPaymentStatus' => function (PaymentStatusRequestTransfer $paymentStatusRequestTransfer) use ($transactionId): PaymentStatusResponseTransfer {
+                // Ensure that required data is passed to the PaymentPlatformPlugin
+                $this->assertNotNull($paymentStatusRequestTransfer->getAppConfig());
+                $this->assertSame($paymentStatusRequestTransfer->getTransactionId(), $transactionId);
+
+                $paymentStatusResponseTransfer = new PaymentStatusResponseTransfer();
+                $paymentStatusResponseTransfer
+                    ->setIsSuccessful(true);
+
+                return $paymentStatusResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        $this->tester->amOnPage(sprintf('/app-payment/redirect'));
+        $this->tester->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
+    }
 
     public function testGivenPaymentWasSuccessfulGetRedirectUrlReturnsSuccessPageUrl(): void
     {

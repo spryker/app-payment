@@ -14,11 +14,14 @@ use Generated\Shared\Transfer\CancelPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\CapturePaymentTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
+use Generated\Shared\Transfer\CustomerRequestTransfer;
+use Generated\Shared\Transfer\CustomerResponseTransfer;
 use Generated\Shared\Transfer\InitializePaymentRequestTransfer;
 use Generated\Shared\Transfer\InitializePaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\PaymentCollectionTransfer;
 use Generated\Shared\Transfer\PaymentCriteriaTransfer;
+use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\PaymentPageRequestTransfer;
 use Generated\Shared\Transfer\PaymentPageResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
@@ -100,7 +103,11 @@ class AppPaymentFacade extends AbstractFacade implements AppPaymentFacadeInterfa
     /**
      * @api
      *
+     * @codeCoverageIgnore
+     *
      * @inheritDoc
+     *
+     * @deprecated Method is used by a deprecated plugin and will be removed as well.
      */
     public function sendDeletePaymentMethodMessage(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
@@ -188,5 +195,15 @@ class AppPaymentFacade extends AbstractFacade implements AppPaymentFacadeInterfa
         CancelPreOrderPaymentRequestTransfer $cancelPreOrderPaymentRequestTransfer
     ): CancelPreOrderPaymentResponseTransfer {
         return $this->getFactory()->createPayment()->cancelPreOrderPayment($cancelPreOrderPaymentRequestTransfer);
+    }
+
+    public function getPaymentMethodByTenantIdentifierAndPaymentMethodKey(string $tenantIdentifier, string $paymentMethodKey): PaymentMethodTransfer
+    {
+        return $this->getFactory()->createPayment()->getPaymentMethodByTenantIdentifierAndPaymentMethodKey($tenantIdentifier, $paymentMethodKey);
+    }
+
+    public function customer(CustomerRequestTransfer $customerRequestTransfer): CustomerResponseTransfer
+    {
+        return $this->getFactory()->createPayment()->customer($customerRequestTransfer);
     }
 }

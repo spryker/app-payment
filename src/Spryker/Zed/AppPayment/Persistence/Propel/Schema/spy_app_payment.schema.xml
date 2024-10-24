@@ -79,6 +79,7 @@
         <column name="name" required="true" type="VARCHAR" size="128"/>
         <column name="provider_name" required="true" type="VARCHAR" size="128"/>
         <column name="payment_method_app_configuration" type="LONGVARCHAR"/>
+        <column name="payment_method_key" type="VARCHAR" size="36"/>
 
         <behavior name="timestampable">
             <parameter name="create_column" value="created_at"/>

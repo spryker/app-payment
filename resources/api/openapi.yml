@@ -130,7 +130,7 @@ paths:
             x-spryker:
                 module: PaymentBackendApi
                 controller: PaymentsTransfersResourceController
-            summary: 'Endpoint which will be used by SCOS to to transfer money to Merchants or to reverse previously made transfers.'
+            summary: 'Endpoint which will be used by SCOS to transfer money to Merchants or to reverse previously made transfers.'
             parameters:
                 -   $ref: '#/components/parameters/tenantIdentifier'
             requestBody:
@@ -147,6 +147,37 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/TransfersResponse'
+                400:
+                    description: 'Bad request.'
+                default:
+                    description: 'Expected response to a bad request.'
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+
+    '/private/customer':
+        post:
+            x-spryker:
+                module: PaymentBackendApi
+                controller: CustomerResourceController
+            summary: 'Endpoint which will be used by SCOS to get customer details. The customer data could be retrieved from the App DB or via an API call from the PSP depending on the Payment App implementation.'
+            parameters:
+                -   $ref: '#/components/parameters/tenantIdentifier'
+            requestBody:
+                description: 'Provides data needed to get customer data.'
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CustomerRequest'
+            responses:
+                201:
+                    description: 'Response with customer data.'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CustomerResponse'
                 400:
                     description: 'Bad request.'
                 default:
@@ -220,7 +251,7 @@ components:
                             example:
                                 paymentId: '#061280'
                                 other: '#061114'
-                                
+
                 preOrderPaymentData:
                     description: 'Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/'
                     type: string
@@ -442,6 +473,88 @@ components:
                 - orderReference
                 - amount
                 - itemReference
+
+        CustomerRequest:
+            properties:
+                customer:
+                    $ref: '#/components/schemas/Customer'
+                customerPaymentServiceProviderData:
+                    description: 'Key-value object with attributes that can be forwarded to the PSP implementation. https://swagger.io/docs/specification/data-models/dictionaries/'
+                    type: string
+                    additionalProperties:
+                        type: string
+                    example:
+                        externalReference: '#061280'
+                        other: '#061114'
+
+        CustomerResponse:
+            properties:
+                customer:
+                    $ref: '#/components/schemas/Customer'
+
+        Customer:
+            properties:
+                salutation:
+                    type: string
+                firstName:
+                    type: string
+                lastName:
+                    type: string
+                middleName:
+                    type: string
+                gender:
+                    type: string
+                dateOfBirth:
+                    type: string
+                email:
+                    type: string
+                username:
+                    type: string
+                phone:
+                    type: string
+                company:
+                    type: string
+                locale:
+                    type: string
+                billingAddress:
+                    $ref: '#/components/schemas/Address'
+                shippingAddress:
+                    $ref: '#/components/schemas/Address'
+
+        Address:
+            properties:
+                salutation:
+                    type: string
+                firstName:
+                    type: string
+                lastName:
+                    type: string
+                middleName:
+                    type: string
+                address1:
+                    type: string
+                address2:
+                    type: string
+                address3:
+                    type: string
+                city:
+                    type: string
+                zipCode:
+                    type: string
+                state:
+                    type: string
+                country:
+                    type: string
+                region:
+                    type: string
+                company:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                cellPhone:
+                    type: string
 
     parameters:
         tenantIdentifier:
