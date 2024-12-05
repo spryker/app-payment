@@ -20,6 +20,14 @@ class AppPaymentConfig extends AbstractBundleConfig
     public const CHECKOUT_STRATEGY_EXPRESS_CHECKOUT = 'express-checkout';
 
     /**
+     * Using this prefix in transaction id will prevent sending payment created message.
+     * This is for payment methods that will create a payment with a temporary transaction id which will be changed later in the process.
+     *
+     * @var string
+     */
+    public const IGNORE_PAYMENT_CREATED_MESSAGE_SENDING_TRANSACTION_ID_PREFIX = 'tmp-';
+
+    /**
      * @api
      */
     public function getAppIdentifier(): string

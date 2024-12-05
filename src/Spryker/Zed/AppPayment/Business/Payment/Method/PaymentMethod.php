@@ -17,7 +17,6 @@ use Generated\Shared\Transfer\PaymentMethodConfigurationRequestTransfer;
 use Generated\Shared\Transfer\PaymentMethodTransfer;
 use Generated\Shared\Transfer\UpdatePaymentMethodTransfer;
 use Spryker\Glue\AppPaymentBackendApi\Plugin\GlueApplication\AppPaymentBackendApiRouteProviderPlugin;
-use Spryker\Zed\AppKernel\AppKernelConfig;
 use Spryker\Zed\AppPayment\AppPaymentConfig;
 use Spryker\Zed\AppPayment\Business\Payment\Message\PaymentMethodMessageSender;
 use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformPaymentMethodsPluginInterface;
@@ -36,8 +35,7 @@ class PaymentMethod
 
     public function configurePaymentMethods(AppConfigTransfer $appConfigTransfer): AppConfigTransfer
     {
-        // Do not send the message(s) when App is in state "disconnected" or when the app is marked as inactive.
-        if ($appConfigTransfer->getStatus() === AppKernelConfig::APP_STATUS_DISCONNECTED || $appConfigTransfer->getIsActive() === false || !($this->appPaymentPlatformPlugin instanceof AppPaymentPlatformPaymentMethodsPluginInterface)) {
+        if (!($this->appPaymentPlatformPlugin instanceof AppPaymentPlatformPaymentMethodsPluginInterface)) {
             return $appConfigTransfer;
         }
 

@@ -25,6 +25,7 @@ use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Generated\Shared\Transfer\QuoteItemTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 use Spryker\Shared\Kernel\Transfer\TransferInterface;
+use Spryker\Zed\AppPayment\AppPaymentConfig;
 
 class MessageSender extends AbstractMessageSender
 {
@@ -107,8 +108,14 @@ class MessageSender extends AbstractMessageSender
         $quoteTransfer = $initializePaymentRequestTransfer->getOrderDataOrFail();
 
         // It may be that payment gets created without having either of the following. (PreOrderPayment)
-        // In this case, we do send a message later. E.g. when ConfirmPreOrderPayment is made
+        // In this case, we do send a PaymentUpdated message later. E.g. when ConfirmPreOrderPayment is made
         if (!$quoteTransfer->getOrderReference() && ($initializePaymentResponseTransfer->getTransactionId() === null || $initializePaymentResponseTransfer->getTransactionId() === '' || $initializePaymentResponseTransfer->getTransactionId() === '0')) {
+            return;
+        }
+
+        $transactionId = $initializePaymentResponseTransfer->getTransactionIdOrFail();
+
+        if (str_starts_with($transactionId, AppPaymentConfig::IGNORE_PAYMENT_CREATED_MESSAGE_SENDING_TRANSACTION_ID_PREFIX)) {
             return;
         }
 
@@ -131,7 +138,8 @@ class MessageSender extends AbstractMessageSender
         $paymentUpdatedTransfer = new PaymentUpdatedTransfer();
         $paymentUpdatedTransfer
             ->setEntityReference($paymentTransfer->getOrderReference())
-            ->setPaymentReference($paymentTransfer->getTransactionIdOrFail());
+            ->setPaymentReference($paymentTransfer->getTransactionIdOrFail())
+            ->setDetails($paymentTransfer->getDetailsOrFail());
 
         $paymentUpdatedTransfer->setMessageAttributes($this->getMessageAttributes(
             $paymentTransfer->getTenantIdentifierOrFail(),

@@ -416,12 +416,14 @@
     <transfer name="PaymentCreated" strict="true">
         <property name="entityReference" type="string"/>
         <property name="paymentReference" type="string"/>
+        <property name="details" type="string"/>
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 
     <transfer name="PaymentUpdated" strict="true">
         <property name="entityReference" type="string"/>
         <property name="paymentReference" type="string"/>
+        <property name="details" type="string"/>
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 

@@ -31,14 +31,21 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentGlueBackendApiHelper extends SprykerGlueBackendApiHelper
 {
+    public function sendPost(string $url, array $parameters = [], ?string $content = null): Response
+    {
+        return $this->executeRequest($url, 'POST', $parameters, $content);
+    }
+
     /**
      * @param array<mixed, mixed>|string $parameters
      */
-    protected function executeRequest(string $url, string $method, array $parameters = []): Response
+    protected function executeRequest(string $url, string $method, array $parameters = [], ?string $content = null): Response
     {
         $this->addHeader('Accept', 'application/json');
 
-        $request = Request::create($url, strtolower($method), $parameters, [], [], [], $parameters !== [] ? json_encode($parameters, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR) : null);
+        $content = $content ?? ($parameters ? json_encode($parameters, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR) : null);
+
+        $request = Request::create($url, strtolower($method), $parameters, [], [], [], $content);
         $request = $this->removeServerAndHeaderDefaults($request);
 
         $request->headers->add($this->headers);
