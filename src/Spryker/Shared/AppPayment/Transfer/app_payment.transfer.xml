@@ -360,6 +360,22 @@
         <property name="messageAttributes" type="MessageAttributes"/>
     </transfer>
 
+    <transfer name="PaymentOverpaid" strict="true">
+        <property name="orderReference" type="string"/>
+        <property name="orderItemIds" type="array" singular="orderItemId"/>
+        <property name="amount" type="int"/>
+        <property name="currencyIsoCode" type="string"/>
+        <property name="messageAttributes" type="MessageAttributes"/>
+    </transfer>
+
+    <transfer name="PaymentUnderpaid" strict="true">
+        <property name="orderReference" type="string"/>
+        <property name="orderItemIds" type="array" singular="orderItemId"/>
+        <property name="amount" type="int"/>
+        <property name="currencyIsoCode" type="string"/>
+        <property name="messageAttributes" type="MessageAttributes"/>
+    </transfer>
+
     <transfer name="PaymentMethod" strict="true">
         <property name="name" type="string"/>
         <property name="providerName" type="string"/>

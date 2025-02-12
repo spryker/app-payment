@@ -8,6 +8,7 @@
 namespace SprykerTest\AsyncApi\AppPayment\AppPaymentTests\PaymentEvents;
 
 use Codeception\Test\Unit;
+use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Generated\Shared\Transfer\WebhookRequestTransfer;
 use Generated\Shared\Transfer\WebhookResponseTransfer;
 use Ramsey\Uuid\Uuid;
@@ -58,5 +59,35 @@ class PaymentCapturedTest extends Unit
 
         // Assert
         $this->tester->assertMessageWasEmittedOnChannel($paymentCapturedTransfer, 'payment-events');
+    }
+
+    public function testPaymentUpdatedMessageIsSentWithSourceAndTargetStatus(): void
+    {
+        // Arrange
+        $transactionId = Uuid::uuid4()->toString();
+        $tenantIdentifier = Uuid::uuid4()->toString();
+
+        $this->tester->haveAppConfigForTenant($tenantIdentifier);
+        $this->tester->havePaymentForTransactionId($transactionId, $tenantIdentifier, PaymentStatus::STATUS_AUTHORIZED);
+
+        $webhookRequestTransfer = (new WebhookRequestTransfer())
+            ->setMode('test')
+            ->setType(WebhookDataType::PAYMENT)
+            ->setTransactionId($transactionId);
+
+        $this->tester->mockPlatformPlugin(PaymentStatus::STATUS_CAPTURED);
+
+        // Act
+        $this->tester->getFacade()->handleWebhook($webhookRequestTransfer, new WebhookResponseTransfer());
+
+        // Assert
+        $paymentUpdatedTransfer = $this->tester->havePaymentUpdatedTransfer();
+
+        $this->tester->assertMessageWasEmittedOnChannel($paymentUpdatedTransfer, 'payment-events', function (PaymentUpdatedTransfer $usedPaymentUpdatedTransfer, PaymentUpdatedTransfer $sentPaymentUpdatedTransfer): void {
+            $detailsArray = json_decode($sentPaymentUpdatedTransfer->getDetails(), true);
+
+            $this->assertSame($detailsArray['sourceStatus'], PaymentStatus::STATUS_AUTHORIZED);
+            $this->assertSame($detailsArray['targetStatus'], PaymentStatus::STATUS_CAPTURED);
+        });
     }
 }

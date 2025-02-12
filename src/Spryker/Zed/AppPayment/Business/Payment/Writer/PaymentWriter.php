@@ -69,6 +69,11 @@ class PaymentWriter implements PaymentWriterInterface
             $detailsArray[$statusText] = $formattedDateTime;
         }
 
+        if ($this->hasStatusChanged($paymentTransfer)) {
+            $detailsArray['sourceStatus'] = $paymentTransfer->getOriginPaymentOrFail()->getStatusOrFail();
+            $detailsArray['targetStatus'] = $paymentTransfer->getStatusOrFail();
+        }
+
         $paymentTransfer->setDetails((string)json_encode($detailsArray));
 
         return $paymentTransfer;

@@ -39,6 +39,7 @@
 
     <transfer name="QuoteItem" strict="true">
         <property name="name" dataBuilderRule="word()"/>
+        <property name="sku" dataBuilderRule="unique()->uuid()"/>
     </transfer>
 
     <transfer name="CancelPayment" strict="true">

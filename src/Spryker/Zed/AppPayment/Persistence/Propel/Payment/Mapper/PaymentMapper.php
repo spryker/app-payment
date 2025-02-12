@@ -54,8 +54,10 @@ class PaymentMapper
 
         $paymentTransfer = $paymentTransfer->fromArray($paymentData, true);
 
-        // Setting the originPayment to be able to compare later if needed.
-        $paymentTransfer->setOriginPayment(clone $paymentTransfer);
+        if (!$paymentTransfer->getOriginPayment()) {
+            // Setting the originPayment to be able to compare later if needed.
+            $paymentTransfer->setOriginPayment(clone $paymentTransfer);
+        }
 
         return $paymentTransfer;
     }

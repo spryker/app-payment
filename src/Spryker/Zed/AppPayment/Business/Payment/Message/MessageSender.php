@@ -16,9 +16,11 @@ use Generated\Shared\Transfer\PaymentCancellationFailedTransfer;
 use Generated\Shared\Transfer\PaymentCapturedTransfer;
 use Generated\Shared\Transfer\PaymentCaptureFailedTransfer;
 use Generated\Shared\Transfer\PaymentCreatedTransfer;
+use Generated\Shared\Transfer\PaymentOverpaidTransfer;
 use Generated\Shared\Transfer\PaymentRefundedTransfer;
 use Generated\Shared\Transfer\PaymentRefundFailedTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
+use Generated\Shared\Transfer\PaymentUnderpaidTransfer;
 use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Generated\Shared\Transfer\QuoteItemTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
@@ -97,6 +99,30 @@ class MessageSender extends AbstractMessageSender
         ));
 
         $this->appPaymentToMessageBrokerFacade->sendMessage($paymentCancellationFailedTransfer);
+    }
+
+    public function sendPaymentOverpaidMessage(PaymentTransfer $paymentTransfer, ?MessageContextTransfer $messageContextTransfer = null): void
+    {
+        $paymentOverpaidTransfer = $this->mapPaymentTransferToPaymentMessageTransfer($paymentTransfer, new PaymentOverpaidTransfer(), $messageContextTransfer);
+
+        $paymentOverpaidTransfer->setMessageAttributes($this->getMessageAttributes(
+            $paymentTransfer->getTenantIdentifierOrFail(),
+            $paymentOverpaidTransfer::class,
+        ));
+
+        $this->appPaymentToMessageBrokerFacade->sendMessage($paymentOverpaidTransfer);
+    }
+
+    public function sendPaymentUnderpaidMessage(PaymentTransfer $paymentTransfer, ?MessageContextTransfer $messageContextTransfer = null): void
+    {
+        $paymentUnderpaidTransfer = $this->mapPaymentTransferToPaymentMessageTransfer($paymentTransfer, new PaymentUnderpaidTransfer(), $messageContextTransfer);
+
+        $paymentUnderpaidTransfer->setMessageAttributes($this->getMessageAttributes(
+            $paymentTransfer->getTenantIdentifierOrFail(),
+            $paymentUnderpaidTransfer::class,
+        ));
+
+        $this->appPaymentToMessageBrokerFacade->sendMessage($paymentUnderpaidTransfer);
     }
 
     public function sendPaymentCreatedMessage(
