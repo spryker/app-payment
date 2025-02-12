@@ -98,8 +98,75 @@ class AppPaymentHelper extends Module
         return $paymentTransmissionTransfer;
     }
 
+    public function haveNewPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_NEW;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveAuthorizedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_AUTHORIZED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveAuthorizationFailedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_AUTHORIZATION_FAILED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCapturedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCaptureFailedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURE_FAILED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCaptureRequestedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURE_REQUESTED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveOverpaidPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_OVERPAID;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveUnderpaidPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_UNDERPAID;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCanceledPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CANCELED;
+
+        return $this->havePayment($seed);
+    }
+
     public function havePayment(array $seed = []): PaymentTransfer
     {
+        $seed[PaymentTransfer::TENANT_IDENTIFIER] = $seed[PaymentTransfer::TENANT_IDENTIFIER] ?? Uuid::uuid4()->toString();
+        $seed[PaymentTransfer::ORDER_REFERENCE] = $seed[PaymentTransfer::ORDER_REFERENCE] ?? Uuid::uuid4()->toString();
+        $seed[PaymentTransfer::TRANSACTION_ID] = $seed[PaymentTransfer::TRANSACTION_ID] ?? Uuid::uuid4()->toString();
+
         $quoteBuilder = new QuoteBuilder($seed);
         $quoteBuilder->withItem()
             ->withAnotherItem();
