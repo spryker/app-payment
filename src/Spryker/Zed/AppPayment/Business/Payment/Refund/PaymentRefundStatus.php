@@ -12,25 +12,30 @@ enum PaymentRefundStatus
     /**
      * @var string
      */
-    public const PENDING = 'pending';
+    public const PENDING = 'refund pending';
 
     /**
      * @var string
      */
-    public const SUCCEEDED = 'succeeded';
+    public const SUCCEEDED = 'refund succeeded';
 
     /**
      * @var string
      */
-    public const FAILED = 'failed';
+    public const FAILED = 'refund failed';
 
     /**
      * @var string
      */
-    public const CANCELED = 'canceled';
+    public const CANCELED = 'refund canceled';
 
     /**
      * @var string
      */
-    public const PROCESSING = 'processing';
+    public const PROCESSING = 'refund processing';
+
+    /**
+     * @var string
+     */
+    public const PARTIALLY = 'refunded partially';
 }

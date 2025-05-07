@@ -15,6 +15,7 @@ use Generated\Shared\Transfer\RefundPaymentResponseTransfer;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AppPayment\AppPaymentConfig;
 use Spryker\Zed\AppPayment\Business\Payment\AppConfig\AppConfigLoader;
+use Spryker\Zed\AppPayment\Business\Payment\Status\PaymentStatus;
 use Spryker\Zed\AppPayment\Business\Payment\Writer\PaymentWriterInterface;
 use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformPluginInterface;
 use Spryker\Zed\AppPayment\Persistence\AppPaymentEntityManagerInterface;
@@ -76,10 +77,20 @@ class PaymentRefunder
 
             $paymentTransfer = $refundPaymentResponseTransfer->getPayment() ?? $refundPaymentRequestTransfer->getPaymentOrFail();
 
-            $this->savePayment($paymentTransfer, $refundPaymentResponseTransfer->getStatusOrFail());
+            $paymentStatus = $this->mapRefundStatusToPaymentStatus($refundPaymentResponseTransfer->getStatusOrFail());
+            $this->savePayment($paymentTransfer, $paymentStatus);
 
             return $refundPaymentResponseTransfer;
         });
+    }
+
+    protected function mapRefundStatusToPaymentStatus(string $refundStatus): string
+    {
+        return match ($refundStatus) {
+            PaymentRefundStatus::SUCCEEDED => PaymentStatus::STATUS_REFUNDED,
+            PaymentRefundStatus::PARTIALLY => PaymentStatus::STATUS_PARTIALLY_REFUNDED,
+            default => PaymentStatus::STATUS_REFUNDED,
+        };
     }
 
     protected function savePayment(PaymentTransfer $paymentTransfer, string $status): void

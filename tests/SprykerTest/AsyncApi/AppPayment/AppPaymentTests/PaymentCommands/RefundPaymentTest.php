@@ -100,6 +100,7 @@ class RefundPaymentTest extends Unit
 
         // Assert
         $this->tester->assertPaymentRefundIsInStatus($refundId, PaymentRefundStatus::SUCCEEDED);
+        $this->tester->assertPaymentIsInState($transactionId, PaymentStatus::STATUS_REFUNDED);
         $this->tester->assertMessageWasSent(PaymentRefundedTransfer::class);
     }
 

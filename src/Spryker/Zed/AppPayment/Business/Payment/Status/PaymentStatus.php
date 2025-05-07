@@ -60,6 +60,21 @@ enum PaymentStatus
     public const STATUS_UNDERPAID = 'underpaid';
 
     /**
+     * @var string
+     */
+    public const STATUS_REFUNDED = 'refunded';
+
+    /**
+     * @var string
+     */
+    public const STATUS_REFUND_FAILED = 'refund failed';
+
+    /**
+     * @var string
+     */
+    public const STATUS_PARTIALLY_REFUNDED = 'partially refunded';
+
+    /**
      * @var array<string, array<string>>
      */
     public const ALLOWED_TRANSITIONS = [
@@ -98,6 +113,18 @@ enum PaymentStatus
         ],
         PaymentStatus::STATUS_CANCELLATION_FAILED => [
             PaymentStatus::STATUS_CANCELED,
+        ],
+        PaymentStatus::STATUS_CAPTURED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
+        ],
+        PaymentStatus::STATUS_PARTIALLY_REFUNDED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
+        ],
+        PaymentStatus::STATUS_REFUND_FAILED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
         ],
     ];
 }
