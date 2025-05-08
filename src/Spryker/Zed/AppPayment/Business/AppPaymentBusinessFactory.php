@@ -255,6 +255,7 @@ class AppPaymentBusinessFactory extends AbstractBusinessFactory
             $this->getPlatformPlugin(),
             $this->createPaymentRefundValidator(),
             $this->getEntityManager(),
+            $this->getRepository(),
             $this->createPaymentWriter(),
             $this->getConfig(),
             $this->createAppConfigLoader(),

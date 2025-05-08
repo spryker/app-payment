@@ -72,4 +72,9 @@ interface AppPaymentRepositoryInterface
     public function savePaymentMethod(PaymentMethodTransfer $paymentMethodTransfer, string $tenantIdentifier): PaymentMethodTransfer;
 
     public function deletePaymentMethod(PaymentMethodTransfer $paymentMethodTransfer, string $tenantIdentifier): PaymentMethodTransfer;
+
+    /**
+     * @return array<\Generated\Shared\Transfer\PaymentRefundTransfer>
+     */
+    public function getRefundsByTransactionId(string $transactionId): array;
 }

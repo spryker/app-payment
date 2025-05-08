@@ -31,6 +31,7 @@ use Generated\Shared\Transfer\PaymentTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionTransfer;
+use Generated\Shared\Transfer\QuoteItemTransfer;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentStatusHistoryQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentTransfer;
@@ -168,8 +169,8 @@ class AppPaymentHelper extends Module
         $seed[PaymentTransfer::TRANSACTION_ID] = $seed[PaymentTransfer::TRANSACTION_ID] ?? Uuid::uuid4()->toString();
 
         $quoteBuilder = new QuoteBuilder($seed);
-        $quoteBuilder->withItem()
-            ->withAnotherItem();
+        $quoteBuilder->withItem([QuoteItemTransfer::ID_SALES_ORDER_ITEM => Uuid::uuid4()->toString()])
+            ->withAnotherItem([QuoteItemTransfer::ID_SALES_ORDER_ITEM => Uuid::uuid4()->toString()]);
 
         $paymentTransfer = (new PaymentBuilder($seed))->build();
         $quoteTransfer = $quoteBuilder->build();

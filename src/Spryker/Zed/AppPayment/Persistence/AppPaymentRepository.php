@@ -145,6 +145,19 @@ class AppPaymentRepository extends AbstractRepository implements AppPaymentRepos
             ->mapPaymentRefundEntityCollectionToPaymentRefundTransfers($paymentRefundEntityCollection);
     }
 
+    /**
+     * @return array<\Generated\Shared\Transfer\PaymentRefundTransfer>
+     */
+    public function getRefundsByTransactionId(string $transactionId): array
+    {
+        $paymentRefundEntityCollection = $this->getFactory()->createPaymentRefundQuery()
+            ->filterByTransactionId($transactionId)
+            ->find();
+
+        return $this->getFactory()->createPaymentMapper()
+            ->mapPaymentRefundEntityCollectionToPaymentRefundTransfers($paymentRefundEntityCollection);
+    }
+
     protected function applyPaymentCriteria(
         SpyPaymentQuery $spyPaymentQuery,
         PaymentCriteriaTransfer $paymentCriteriaTransfer
