@@ -15,9 +15,11 @@ use Generated\Shared\Transfer\RefundPaymentResponseTransfer;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AppPayment\AppPaymentConfig;
 use Spryker\Zed\AppPayment\Business\Payment\AppConfig\AppConfigLoader;
+use Spryker\Zed\AppPayment\Business\Payment\Status\PaymentStatus;
 use Spryker\Zed\AppPayment\Business\Payment\Writer\PaymentWriterInterface;
 use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformPluginInterface;
 use Spryker\Zed\AppPayment\Persistence\AppPaymentEntityManagerInterface;
+use Spryker\Zed\AppPayment\Persistence\AppPaymentRepositoryInterface;
 use Spryker\Zed\Kernel\Persistence\EntityManager\TransactionTrait;
 use Throwable;
 
@@ -30,6 +32,7 @@ class PaymentRefunder
         protected AppPaymentPlatformPluginInterface $appPaymentPlatformPlugin,
         protected PaymentRefundValidator $paymentRefundValidator,
         protected AppPaymentEntityManagerInterface $appPaymentEntityManager,
+        protected AppPaymentRepositoryInterface $appPaymentRepository,
         protected PaymentWriterInterface $paymentWriter,
         protected AppPaymentConfig $appPaymentConfig,
         protected AppConfigLoader $appConfigLoader
@@ -76,10 +79,29 @@ class PaymentRefunder
 
             $paymentTransfer = $refundPaymentResponseTransfer->getPayment() ?? $refundPaymentRequestTransfer->getPaymentOrFail();
 
-            $this->savePayment($paymentTransfer, $refundPaymentResponseTransfer->getStatusOrFail());
+            $paymentStatus = PaymentStatus::STATUS_REFUNDED;
+
+            // When we still have items which are not refunded we have to set the state to partially refunded
+            if ($paymentTransfer->getQuoteOrFail()->getItems()->count() > $this->getRefundedOrderItemCountForTransaction($refundPaymentRequestTransfer)) {
+                $paymentStatus = PaymentStatus::STATUS_PARTIALLY_REFUNDED;
+            }
+
+            $this->savePayment($paymentTransfer, $paymentStatus);
 
             return $refundPaymentResponseTransfer;
         });
+    }
+
+    protected function getRefundedOrderItemCountForTransaction(RefundPaymentRequestTransfer $refundPaymentRequestTransfer): int
+    {
+        $paymentRefundTransferCollection = $this->appPaymentRepository->getRefundsByTransactionId($refundPaymentRequestTransfer->getTransactionIdOrFail());
+        $refundedOrderItemCount = 0;
+
+        foreach ($paymentRefundTransferCollection as $paymentRefundTransfer) {
+            $refundedOrderItemCount += count($paymentRefundTransfer->getOrderItemIds());
+        }
+
+        return $refundedOrderItemCount;
     }
 
     protected function savePayment(PaymentTransfer $paymentTransfer, string $status): void

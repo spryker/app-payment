@@ -100,6 +100,109 @@ class RefundPaymentTest extends Unit
 
         // Assert
         $this->tester->assertPaymentRefundIsInStatus($refundId, PaymentRefundStatus::SUCCEEDED);
+        $this->tester->assertPaymentIsInState($transactionId, PaymentStatus::STATUS_PARTIALLY_REFUNDED);
+        $this->tester->assertMessageWasSent(PaymentRefundedTransfer::class);
+    }
+
+    public function testRefundPaymentMessageSendsPaymentRefundedMessageAndCreatesPaymentRefundWhenPaymentIsInPartiallyRefundedState(): void
+    {
+        // Arrange
+        $tenantIdentifier = Uuid::uuid4()->toString();
+        $transactionId = Uuid::uuid4()->toString();
+        $refundId = Uuid::uuid4()->toString();
+        $this->tester->haveAppConfigForTenant($tenantIdentifier);
+        $paymentTransfer = $this->tester->havePaymentForTransactionId($transactionId, $tenantIdentifier, PaymentStatus::STATUS_PARTIALLY_REFUNDED);
+
+        $refundPaymentTransfer = $this->tester->haveRefundPaymentTransfer([
+            MessageAttributesTransfer::TENANT_IDENTIFIER => $tenantIdentifier,
+            RefundPaymentTransfer::ORDER_REFERENCE => $paymentTransfer->getOrderReference(),
+        ]);
+
+        $refundPaymentResponseTransfer = (new RefundPaymentResponseTransfer())
+            ->setIsSuccessful(true)
+            ->setRefundId($refundId)
+            ->setStatus(PaymentRefundStatus::SUCCEEDED);
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformPluginInterface::class, [
+            'refundPayment' => function (RefundPaymentRequestTransfer $refundPaymentRequestTransfer) use ($refundPaymentResponseTransfer) {
+                $this->assertInstanceOf(AppConfigTransfer::class, $refundPaymentRequestTransfer->getAppConfig());
+                $this->assertInstanceOf(PaymentTransfer::class, $refundPaymentRequestTransfer->getPayment());
+
+                return $refundPaymentResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        // Act: This will trigger the MessageHandlerPlugin for this message.
+        $this->tester->runMessageReceiveTest($refundPaymentTransfer, 'payment-commands');
+
+        // Assert
+        $this->tester->assertPaymentRefundIsInStatus($refundId, PaymentRefundStatus::SUCCEEDED);
+        $this->tester->assertPaymentIsInState($transactionId, PaymentStatus::STATUS_PARTIALLY_REFUNDED);
+        $this->tester->assertMessageWasSent(PaymentRefundedTransfer::class);
+    }
+
+    /**
+     * @group single
+     */
+    public function testRefundPaymentMessageCanBeHandledOneAfterTheOtherAndMovesOrderFromCapturedStateToPartiallyRefundedAndFinalRefundedState(): void
+    {
+        // Arrange
+        $tenantIdentifier = Uuid::uuid4()->toString();
+        $transactionId = Uuid::uuid4()->toString();
+        $refundId = Uuid::uuid4()->toString();
+        $this->tester->haveAppConfigForTenant($tenantIdentifier);
+        $paymentTransfer = $this->tester->havePaymentForTransactionId($transactionId, $tenantIdentifier, PaymentStatus::STATUS_CAPTURED);
+
+        $orderItems = $paymentTransfer->getQuote()->getItems();
+
+        $firstOrderItem = $orderItems->offsetGet(0);
+        $secondOrderItem = $orderItems->offsetGet(1);
+
+        $refundPaymentTransfer1 = $this->tester->haveRefundPaymentTransfer([
+            MessageAttributesTransfer::TENANT_IDENTIFIER => $tenantIdentifier,
+            RefundPaymentTransfer::ORDER_REFERENCE => $paymentTransfer->getOrderReference(),
+        ], [
+            $firstOrderItem->getIdSalesOrderItem(),
+        ]);
+
+        $refundPaymentTransfer2 = $this->tester->haveRefundPaymentTransfer([
+            MessageAttributesTransfer::TENANT_IDENTIFIER => $tenantIdentifier,
+            RefundPaymentTransfer::ORDER_REFERENCE => $paymentTransfer->getOrderReference(),
+        ], [
+            $secondOrderItem->getIdSalesOrderItem(),
+        ]);
+
+        $refundPaymentResponseTransfer = (new RefundPaymentResponseTransfer())
+            ->setIsSuccessful(true)
+            ->setRefundId($refundId)
+            ->setStatus(PaymentRefundStatus::SUCCEEDED);
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformPluginInterface::class, [
+            'refundPayment' => function (RefundPaymentRequestTransfer $refundPaymentRequestTransfer) use ($refundPaymentResponseTransfer) {
+                $this->assertInstanceOf(AppConfigTransfer::class, $refundPaymentRequestTransfer->getAppConfig());
+                $this->assertInstanceOf(PaymentTransfer::class, $refundPaymentRequestTransfer->getPayment());
+
+                return $refundPaymentResponseTransfer;
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        // Act: This will trigger the MessageHandlerPlugin for this message.
+        $this->tester->runMessageReceiveTest($refundPaymentTransfer1, 'payment-commands');
+
+        // Assert
+        $this->tester->assertPaymentRefundIsInStatus($refundId, PaymentRefundStatus::SUCCEEDED);
+        $this->tester->assertPaymentIsInState($transactionId, PaymentStatus::STATUS_PARTIALLY_REFUNDED);
+        $this->tester->assertMessageWasSent(PaymentRefundedTransfer::class);
+
+        $this->tester->runMessageReceiveTest($refundPaymentTransfer2, 'payment-commands');
+
+        // Assert
+        $this->tester->assertPaymentRefundIsInStatus($refundId, PaymentRefundStatus::SUCCEEDED);
+        $this->tester->assertPaymentIsInState($transactionId, PaymentStatus::STATUS_REFUNDED);
         $this->tester->assertMessageWasSent(PaymentRefundedTransfer::class);
     }
 

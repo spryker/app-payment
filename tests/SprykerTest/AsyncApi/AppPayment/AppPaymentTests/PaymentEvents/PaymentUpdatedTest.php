@@ -13,8 +13,10 @@ use Generated\Shared\Transfer\AppConfigTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentRequestTransfer;
 use Generated\Shared\Transfer\ConfirmPreOrderPaymentResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransfer;
+use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Ramsey\Uuid\Uuid;
 use Spryker\Zed\AppPayment\AppPaymentDependencyProvider;
+use Spryker\Zed\AppPayment\Business\Payment\Status\PaymentStatus;
 use Spryker\Zed\AppPayment\Dependency\Plugin\AppPaymentPlatformConfirmPreOrderPluginInterface;
 use SprykerTest\AsyncApi\AppPayment\AppPaymentAsyncApiTester;
 use SprykerTest\Shared\Testify\Helper\DependencyHelperTrait;
@@ -55,11 +57,13 @@ class PaymentUpdatedTest extends Unit
 
         $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformConfirmPreOrderPluginInterface::class, [
             'confirmPreOrderPayment' => function (ConfirmPreOrderPaymentRequestTransfer $confirmPreOrderPaymentRequestTransfer) use ($confirmPreOrderPaymentResponseTransfer) {
+                $paymentTransfer = $confirmPreOrderPaymentRequestTransfer->getPayment();
+
                 // Ensure that the AppConfig is always passed to the platform plugin.
                 $this->assertInstanceOf(AppConfigTransfer::class, $confirmPreOrderPaymentRequestTransfer->getAppConfig());
-                $this->assertInstanceOf(PaymentTransfer::class, $confirmPreOrderPaymentRequestTransfer->getPayment());
+                $this->assertInstanceOf(PaymentTransfer::class, $paymentTransfer);
 
-                return $confirmPreOrderPaymentResponseTransfer;
+                return $confirmPreOrderPaymentResponseTransfer->setStatus(PaymentStatus::STATUS_AUTHORIZED);
             },
         ]);
 
@@ -70,5 +74,50 @@ class PaymentUpdatedTest extends Unit
 
         // Assert
         $this->tester->assertMessageWasEmittedOnChannel($paymentUpdatedTransfer, 'payment-events');
+    }
+
+    public function testSourceAndTargetStateArePersistedWhenThePaymentStatusHasChanged(): void
+    {
+        // Arrange
+        $tenantIdentifier = Uuid::uuid4()->toString();
+
+        $confirmPreOrderPaymentRequestTransfer = $this->tester->haveConfirmPreOrderPaymentRequestTransfer([
+            ConfirmPreOrderPaymentRequestTransfer::TENANT_IDENTIFIER => $tenantIdentifier,
+        ]);
+
+        $this->tester->haveAppConfigForTenant($confirmPreOrderPaymentRequestTransfer->getTenantIdentifier());
+        $paymentTransfer = $this->tester->havePaymentForTransactionId($confirmPreOrderPaymentRequestTransfer->getTransactionId(), $confirmPreOrderPaymentRequestTransfer->getTenantIdentifier());
+        $confirmPreOrderPaymentRequestTransfer->setOrderData($paymentTransfer->getQuote());
+
+        $confirmPreOrderPaymentResponseTransfer = new ConfirmPreOrderPaymentResponseTransfer();
+        $confirmPreOrderPaymentResponseTransfer
+            ->setIsSuccessful(true);
+
+        $platformPluginMock = Stub::makeEmpty(AppPaymentPlatformConfirmPreOrderPluginInterface::class, [
+            'confirmPreOrderPayment' => function (ConfirmPreOrderPaymentRequestTransfer $confirmPreOrderPaymentRequestTransfer) use ($confirmPreOrderPaymentResponseTransfer) {
+                $paymentTransfer = $confirmPreOrderPaymentRequestTransfer->getPayment();
+
+                // Ensure that the AppConfig is always passed to the platform plugin.
+                $this->assertInstanceOf(AppConfigTransfer::class, $confirmPreOrderPaymentRequestTransfer->getAppConfig());
+                $this->assertInstanceOf(PaymentTransfer::class, $paymentTransfer);
+
+                return $confirmPreOrderPaymentResponseTransfer->setStatus('updated');
+            },
+        ]);
+
+        $this->getDependencyHelper()->setDependency(AppPaymentDependencyProvider::PLUGIN_PLATFORM, $platformPluginMock);
+
+        $this->tester->getFacade()->confirmPreOrderPayment($confirmPreOrderPaymentRequestTransfer);
+
+        // Assert
+        $this->tester->assertPaymentStatusHistory('updated', $paymentTransfer->getTransactionId());
+        $paymentUpdatedTransfer = $this->tester->havePaymentUpdatedTransfer();
+
+        $this->tester->assertMessageWasEmittedOnChannel($paymentUpdatedTransfer, 'payment-events', function (PaymentUpdatedTransfer $usedPaymentUpdatedTransfer, PaymentUpdatedTransfer $sentPaymentUpdatedTransfer): void {
+            $detailsArray = json_decode($sentPaymentUpdatedTransfer->getDetails(), true);
+
+            $this->assertSame($detailsArray['sourceStatus'], 'new');
+            $this->assertSame($detailsArray['targetStatus'], 'updated');
+        });
     }
 }

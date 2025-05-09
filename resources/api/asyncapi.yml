@@ -15,6 +15,8 @@ channels:
                     - $ref: '#/components/messages/PaymentRefundFailed'
                     - $ref: '#/components/messages/PaymentCanceled'
                     - $ref: '#/components/messages/PaymentCancellationFailed'
+                    - $ref: '#/components/messages/PaymentOverpaid'
+                    - $ref: '#/components/messages/PaymentUnderpaid'
                     - $ref: '#/components/messages/PaymentCreated'
                     - $ref: '#/components/messages/PaymentUpdated'
 
@@ -158,6 +160,24 @@ components:
             x-spryker:
                 module: Payment
             summary: 'Informs about a cancel payment failure.'
+            payload:
+                $ref: '#/components/schemas/PaymentPayload'
+            headers:
+                $ref: '#/components/schemas/message-broker/components/schemas/headers'
+        PaymentOverpaid:
+            name: PaymentOverpaid
+            x-spryker:
+                module: Payment
+            summary: 'Informs about an overpaid payment.'
+            payload:
+                $ref: '#/components/schemas/PaymentPayload'
+            headers:
+                $ref: '#/components/schemas/message-broker/components/schemas/headers'
+        PaymentUnderpaid:
+            name: PaymentUnderpaid
+            x-spryker:
+                module: Payment
+            summary: 'Informs about an underpaid payment.'
             payload:
                 $ref: '#/components/schemas/PaymentPayload'
             headers:

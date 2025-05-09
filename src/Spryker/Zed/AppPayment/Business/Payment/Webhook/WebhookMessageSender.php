@@ -50,11 +50,25 @@ class WebhookMessageSender
             PaymentStatus::STATUS_AUTHORIZATION_FAILED => $this->messageSender->sendPaymentAuthorizationFailedMessage($paymentTransfer),
             PaymentStatus::STATUS_CANCELED => $this->messageSender->sendPaymentCanceledMessage($paymentTransfer),
             PaymentStatus::STATUS_CANCELLATION_FAILED => $this->messageSender->sendPaymentCancellationFailedMessage($paymentTransfer),
+            PaymentStatus::STATUS_OVERPAID => $this->handleOverpaidPayment($paymentTransfer),
+            PaymentStatus::STATUS_UNDERPAID => $this->handleUnderpaidPayment($paymentTransfer),
             default => $this->getLogger()->warning(sprintf('Unhandled payment status "%s" for orderReference "%s" and tenantIdentifier "%s".', $paymentStatus, $paymentTransfer->getOrderReferenceOrFail(), $paymentTransfer->getTenantIdentifierOrFail()), [
                 PaymentTransfer::TRANSACTION_ID => $paymentTransfer->getTransactionIdOrFail(),
                 PaymentTransfer::TENANT_IDENTIFIER => $paymentTransfer->getTenantIdentifierOrFail(),
             ])
         };
+    }
+
+    protected function handleOverpaidPayment(PaymentTransfer $paymentTransfer): void
+    {
+        $this->messageSender->sendPaymentCapturedMessage($paymentTransfer);
+        $this->messageSender->sendPaymentOverpaidMessage($paymentTransfer);
+    }
+
+    protected function handleUnderpaidPayment(PaymentTransfer $paymentTransfer): void
+    {
+        $this->messageSender->sendPaymentCaptureFailedMessage($paymentTransfer);
+        $this->messageSender->sendPaymentUnderpaidMessage($paymentTransfer);
     }
 
     protected function sendMessageForPaymentRefund(WebhookRequestTransfer $webhookRequestTransfer): void

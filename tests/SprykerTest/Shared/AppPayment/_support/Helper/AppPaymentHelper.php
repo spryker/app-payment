@@ -31,6 +31,7 @@ use Generated\Shared\Transfer\PaymentTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsRequestTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionsResponseTransfer;
 use Generated\Shared\Transfer\PaymentTransmissionTransfer;
+use Generated\Shared\Transfer\QuoteItemTransfer;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentStatusHistoryQuery;
 use Orm\Zed\AppPayment\Persistence\SpyPaymentTransfer;
@@ -58,16 +59,16 @@ class AppPaymentHelper extends Module
 
     public function assertPaymentStatusHistory(string $expectedPaymentStatus, string $transactionId): void
     {
-        $spyPaymentStatusHistoryQuery = SpyPaymentStatusHistoryQuery::create()
+        $spyPaymentStatusHistoryEntity = SpyPaymentStatusHistoryQuery::create()
             ->filterByTransactionId($transactionId)
             ->orderByCreatedAt(Criteria::DESC)
             ->findOne();
 
-        if (!$spyPaymentStatusHistoryQuery) {
+        if (!$spyPaymentStatusHistoryEntity) {
             $this->fail(sprintf('Payment status history not found for transaction id "%s".', $transactionId));
         }
 
-        $this->assertSame($expectedPaymentStatus, $spyPaymentStatusHistoryQuery->getStatus());
+        $this->assertSame($expectedPaymentStatus, $spyPaymentStatusHistoryEntity->getStatus());
     }
 
     public function havePaymentForTransactionId(
@@ -98,11 +99,78 @@ class AppPaymentHelper extends Module
         return $paymentTransmissionTransfer;
     }
 
+    public function haveNewPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_NEW;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveAuthorizedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_AUTHORIZED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveAuthorizationFailedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_AUTHORIZATION_FAILED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCapturedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCaptureFailedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURE_FAILED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCaptureRequestedPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CAPTURE_REQUESTED;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveOverpaidPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_OVERPAID;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveUnderpaidPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_UNDERPAID;
+
+        return $this->havePayment($seed);
+    }
+
+    public function haveCanceledPayment(array $seed = []): PaymentTransfer
+    {
+        $seed[PaymentTransfer::STATUS] = PaymentStatus::STATUS_CANCELED;
+
+        return $this->havePayment($seed);
+    }
+
     public function havePayment(array $seed = []): PaymentTransfer
     {
+        $seed[PaymentTransfer::TENANT_IDENTIFIER] = $seed[PaymentTransfer::TENANT_IDENTIFIER] ?? Uuid::uuid4()->toString();
+        $seed[PaymentTransfer::ORDER_REFERENCE] = $seed[PaymentTransfer::ORDER_REFERENCE] ?? Uuid::uuid4()->toString();
+        $seed[PaymentTransfer::TRANSACTION_ID] = $seed[PaymentTransfer::TRANSACTION_ID] ?? Uuid::uuid4()->toString();
+
         $quoteBuilder = new QuoteBuilder($seed);
-        $quoteBuilder->withItem()
-            ->withAnotherItem();
+        $quoteBuilder->withItem([QuoteItemTransfer::ID_SALES_ORDER_ITEM => Uuid::uuid4()->toString()])
+            ->withAnotherItem([QuoteItemTransfer::ID_SALES_ORDER_ITEM => Uuid::uuid4()->toString()]);
 
         $paymentTransfer = (new PaymentBuilder($seed))->build();
         $quoteTransfer = $quoteBuilder->build();

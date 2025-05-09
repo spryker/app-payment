@@ -5,7 +5,6 @@
  */
 
 use Generated\Shared\Transfer\AddPaymentMethodTransfer;
-use Generated\Shared\Transfer\UpdatePaymentMethodTransfer;
 use Generated\Shared\Transfer\AppConfigUpdatedTransfer;
 use Generated\Shared\Transfer\CancelPaymentTransfer;
 use Generated\Shared\Transfer\CapturePaymentTransfer;
@@ -17,10 +16,13 @@ use Generated\Shared\Transfer\PaymentCancellationFailedTransfer;
 use Generated\Shared\Transfer\PaymentCapturedTransfer;
 use Generated\Shared\Transfer\PaymentCaptureFailedTransfer;
 use Generated\Shared\Transfer\PaymentCreatedTransfer;
+use Generated\Shared\Transfer\PaymentOverpaidTransfer;
 use Generated\Shared\Transfer\PaymentRefundedTransfer;
 use Generated\Shared\Transfer\PaymentRefundFailedTransfer;
+use Generated\Shared\Transfer\PaymentUnderpaidTransfer;
 use Generated\Shared\Transfer\PaymentUpdatedTransfer;
 use Generated\Shared\Transfer\RefundPaymentTransfer;
+use Generated\Shared\Transfer\UpdatePaymentMethodTransfer;
 use Ramsey\Uuid\Uuid;
 use Spryker\Shared\AppKernel\AppKernelConstants;
 use Spryker\Shared\Application\ApplicationConstants;
@@ -147,6 +149,8 @@ $config[MessageBrokerAwsConstants::MESSAGE_TO_CHANNEL_MAP] = [
     PaymentRefundFailedTransfer::class => 'payment-events',
     PaymentCanceledTransfer::class => 'payment-events',
     PaymentCancellationFailedTransfer::class => 'payment-events',
+    PaymentOverpaidTransfer::class => 'payment-events',
+    PaymentUnderpaidTransfer::class => 'payment-events',
     CancelPaymentTransfer::class => 'payment-commands',
     CapturePaymentTransfer::class => 'payment-commands',
     RefundPaymentTransfer::class => 'payment-commands',

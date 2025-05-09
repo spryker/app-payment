@@ -50,6 +50,31 @@ enum PaymentStatus
     public const STATUS_AUTHORIZATION_FAILED = 'authorization_failed';
 
     /**
+     * @var string
+     */
+    public const STATUS_OVERPAID = 'overpaid';
+
+    /**
+     * @var string
+     */
+    public const STATUS_UNDERPAID = 'underpaid';
+
+    /**
+     * @var string
+     */
+    public const STATUS_REFUNDED = 'refunded';
+
+    /**
+     * @var string
+     */
+    public const STATUS_REFUND_FAILED = 'refund failed';
+
+    /**
+     * @var string
+     */
+    public const STATUS_PARTIALLY_REFUNDED = 'partially refunded';
+
+    /**
      * @var array<string, array<string>>
      */
     public const ALLOWED_TRANSITIONS = [
@@ -60,6 +85,8 @@ enum PaymentStatus
             PaymentStatus::STATUS_CANCELLATION_FAILED,
             PaymentStatus::STATUS_CAPTURED,
             PaymentStatus::STATUS_CAPTURE_FAILED,
+            PaymentStatus::STATUS_OVERPAID,
+            PaymentStatus::STATUS_UNDERPAID,
         ],
         PaymentStatus::STATUS_AUTHORIZED => [
             PaymentStatus::STATUS_CAPTURED,
@@ -67,19 +94,37 @@ enum PaymentStatus
             PaymentStatus::STATUS_CAPTURE_REQUESTED,
             PaymentStatus::STATUS_CANCELED,
             PaymentStatus::STATUS_CANCELLATION_FAILED,
+            PaymentStatus::STATUS_OVERPAID,
+            PaymentStatus::STATUS_UNDERPAID,
         ],
         PaymentStatus::STATUS_CAPTURE_REQUESTED => [
             PaymentStatus::STATUS_CAPTURED,
             PaymentStatus::STATUS_CAPTURE_FAILED,
             PaymentStatus::STATUS_CANCELED,
             PaymentStatus::STATUS_CANCELLATION_FAILED,
+            PaymentStatus::STATUS_OVERPAID,
+            PaymentStatus::STATUS_UNDERPAID,
         ],
         PaymentStatus::STATUS_CAPTURE_FAILED => [
             PaymentStatus::STATUS_CAPTURED,
             PaymentStatus::STATUS_CAPTURE_REQUESTED,
+            PaymentStatus::STATUS_OVERPAID,
+            PaymentStatus::STATUS_UNDERPAID,
         ],
         PaymentStatus::STATUS_CANCELLATION_FAILED => [
             PaymentStatus::STATUS_CANCELED,
+        ],
+        PaymentStatus::STATUS_CAPTURED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
+        ],
+        PaymentStatus::STATUS_PARTIALLY_REFUNDED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
+        ],
+        PaymentStatus::STATUS_REFUND_FAILED => [
+            PaymentStatus::STATUS_REFUNDED,
+            PaymentStatus::STATUS_PARTIALLY_REFUNDED,
         ],
     ];
 }
