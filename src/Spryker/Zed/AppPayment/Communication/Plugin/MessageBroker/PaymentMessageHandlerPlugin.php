@@ -44,7 +44,7 @@ class PaymentMessageHandlerPlugin extends AbstractPlugin implements MessageHandl
      *
      * @api
      *
-     * @return array<string, callable>
+     * @return \Generator<string, callable>
      */
     public function handles(): iterable
     {
