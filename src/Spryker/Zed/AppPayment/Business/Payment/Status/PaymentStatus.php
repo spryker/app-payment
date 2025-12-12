@@ -126,5 +126,8 @@ enum PaymentStatus
             PaymentStatus::STATUS_REFUNDED,
             PaymentStatus::STATUS_PARTIALLY_REFUNDED,
         ],
+        PaymentStatus::STATUS_UNDERPAID => [
+            PaymentStatus::STATUS_CAPTURED,
+        ],
     ];
 }
