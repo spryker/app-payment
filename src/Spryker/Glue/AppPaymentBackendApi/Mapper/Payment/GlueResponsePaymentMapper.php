@@ -28,7 +28,7 @@ class GlueResponsePaymentMapper implements GlueResponsePaymentMapperInterface
         if ($initializePaymentResponseTransfer->getIsSuccessful() === false) {
             $glueResponseTransfer->setHttpStatus($initializePaymentResponseTransfer->getStatusCode() ?? Response::HTTP_BAD_REQUEST);
 
-            if ($initializePaymentResponseTransfer->getMessage() !== null && $initializePaymentResponseTransfer->getMessage() !== '' && $initializePaymentResponseTransfer->getMessage() !== '0') {
+            if (!in_array($initializePaymentResponseTransfer->getMessage(), [null, '', '0'], true)) {
                 $glueResponseTransfer->addError((new GlueErrorTransfer())->setMessage(
                     $initializePaymentResponseTransfer->getMessage(),
                 ));

@@ -37,11 +37,11 @@ class AppPaymentEntityManager extends AbstractEntityManager implements AppPaymen
     {
         $spyPaymentQuery = $this->getFactory()->createPaymentQuery();
 
-        if ($paymentTransfer->getIdPayment() !== null && $paymentTransfer->getIdPayment() !== '' && $paymentTransfer->getIdPayment() !== '0') {
+        if (!in_array($paymentTransfer->getIdPayment(), [null, '', '0'], true)) {
             $spyPaymentQuery->filterByIdPayment($paymentTransfer->getIdPayment());
         }
 
-        if ($paymentTransfer->getIdPayment() === null || $paymentTransfer->getIdPayment() === '' || $paymentTransfer->getIdPayment() === '0') {
+        if (in_array($paymentTransfer->getIdPayment(), [null, '', '0'], true)) {
             $spyPaymentQuery->filterByTransactionId($paymentTransfer->getTransactionIdOrFail());
         }
 
@@ -99,7 +99,7 @@ class AppPaymentEntityManager extends AbstractEntityManager implements AppPaymen
         $spyPaymentQuery = $this->getFactory()->createPaymentQuery();
         $spyPaymentQuery->filterByTenantIdentifier($paymentCollectionDeleteCriteriaTransfer->getTenantIdentifierOrFail());
 
-        if ($paymentCollectionDeleteCriteriaTransfer->getTransactionId() !== null && $paymentCollectionDeleteCriteriaTransfer->getTransactionId() !== '' && $paymentCollectionDeleteCriteriaTransfer->getTransactionId() !== '0') {
+        if (!in_array($paymentCollectionDeleteCriteriaTransfer->getTransactionId(), [null, '', '0'], true)) {
             $spyPaymentQuery->filterByTransactionId($paymentCollectionDeleteCriteriaTransfer->getTransactionIdOrFail());
         }
 

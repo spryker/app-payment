@@ -130,7 +130,7 @@ class MessageSender extends AbstractMessageSender
     ): void {
         // It may be that payment gets created without having either of the following. (PreOrderPayment)
         // In this case, we do send a PaymentUpdated message later. E.g. when ConfirmPreOrderPayment is made
-        if (($paymentTransfer->getOrderReference() === null || $paymentTransfer->getOrderReference() === '' || $paymentTransfer->getOrderReference() === '0') && ($paymentTransfer->getTransactionId() === null || $paymentTransfer->getTransactionId() === '' || $paymentTransfer->getTransactionId() === '0')) {
+        if ((in_array($paymentTransfer->getOrderReference(), [null, '', '0'], true)) && (in_array($paymentTransfer->getTransactionId(), [null, '', '0'], true))) {
             return;
         }
 
