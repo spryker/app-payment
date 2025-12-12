@@ -34,7 +34,7 @@ class CapturePaymentMessageHandlerPlugin extends AbstractPlugin implements Messa
      *
      * @api
      *
-     * @return \Generator<string, callable>
+     * @return iterable<string, callable>
      */
     public function handles(): iterable
     {

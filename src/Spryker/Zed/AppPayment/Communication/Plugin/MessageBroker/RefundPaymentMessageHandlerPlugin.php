@@ -34,7 +34,7 @@ class RefundPaymentMessageHandlerPlugin extends AbstractPlugin implements Messag
      *
      * @api
      *
-     * @return \Generator<string, callable>
+     * @return iterable<string, callable>
      */
     public function handles(): iterable
     {
