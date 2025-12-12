@@ -36,9 +36,7 @@ class WebhookRequestExtender
             return $webhookRequestTransfer->setAbortHandling(true);
         }
 
-        $webhookRequestTransfer = $this->extendRefundWebhookRequestTransfer($webhookRequestTransfer);
-
-        return $webhookRequestTransfer;
+        return $this->extendRefundWebhookRequestTransfer($webhookRequestTransfer);
     }
 
     protected function extendRefundWebhookRequestTransfer(WebhookRequestTransfer $webhookRequestTransfer): WebhookRequestTransfer

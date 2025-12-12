@@ -34,7 +34,7 @@ class CancelPaymentMessageHandlerPlugin extends AbstractPlugin implements Messag
      *
      * @api
      *
-     * @return array<string, callable>
+     * @return iterable<string, callable>
      */
     public function handles(): iterable
     {

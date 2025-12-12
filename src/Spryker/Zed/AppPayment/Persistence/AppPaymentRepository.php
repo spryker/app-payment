@@ -44,15 +44,15 @@ class AppPaymentRepository extends AbstractRepository implements AppPaymentRepos
     ): PaymentStatusHistoryTransfer {
         $spyPaymentStatusHistoryQuery = $this->getFactory()->createPaymentStatusHistoryQuery();
 
-        if ($paymentStatusHistoryCriteriaTransfer->getTransactionId() !== null && $paymentStatusHistoryCriteriaTransfer->getTransactionId() !== '' && $paymentStatusHistoryCriteriaTransfer->getTransactionId() !== '0') {
+        if (!in_array($paymentStatusHistoryCriteriaTransfer->getTransactionId(), [null, '', '0'], true)) {
             $spyPaymentStatusHistoryQuery->filterByTransactionId($paymentStatusHistoryCriteriaTransfer->getTransactionId());
         }
 
-        if ($paymentStatusHistoryCriteriaTransfer->getTenantIdentifier() !== null && $paymentStatusHistoryCriteriaTransfer->getTenantIdentifier() !== '' && $paymentStatusHistoryCriteriaTransfer->getTenantIdentifier() !== '0') {
+        if (!in_array($paymentStatusHistoryCriteriaTransfer->getTenantIdentifier(), [null, '', '0'], true)) {
             $spyPaymentStatusHistoryQuery->filterByTenantIdentifier($paymentStatusHistoryCriteriaTransfer->getTenantIdentifier());
         }
 
-        if ($paymentStatusHistoryCriteriaTransfer->getOrderReference() !== null && $paymentStatusHistoryCriteriaTransfer->getOrderReference() !== '' && $paymentStatusHistoryCriteriaTransfer->getOrderReference() !== '0') {
+        if (!in_array($paymentStatusHistoryCriteriaTransfer->getOrderReference(), [null, '', '0'], true)) {
             $spyPaymentStatusHistoryQuery->filterByOrderReference($paymentStatusHistoryCriteriaTransfer->getOrderReference());
         }
 

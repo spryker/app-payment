@@ -21,7 +21,7 @@ class PaymentMethodReader
 
     public function getPaymentMethod(PaymentMethodCriteriaTransfer $paymentMethodCriteriaTransfer): PaymentMethodTransfer
     {
-        if ($paymentMethodCriteriaTransfer->getTenantIdentifier() === null || $paymentMethodCriteriaTransfer->getTenantIdentifier() === '' || $paymentMethodCriteriaTransfer->getTenantIdentifier() === '0' || ($paymentMethodCriteriaTransfer->getPaymentMethodKey() === null || $paymentMethodCriteriaTransfer->getPaymentMethodKey() === '' || $paymentMethodCriteriaTransfer->getPaymentMethodKey() === '0')) {
+        if (in_array($paymentMethodCriteriaTransfer->getTenantIdentifier(), [null, '', '0'], true) || (in_array($paymentMethodCriteriaTransfer->getPaymentMethodKey(), [null, '', '0'], true))) {
             throw new PaymentMethodNotFoundException(sprintf(
                 'Payment method "%s" not found for Tenant "%s". Maybe the TenantIdentifier, the PaymentMethodKey, or both are missing.',
                 $paymentMethodCriteriaTransfer->getPaymentMethodKey(),

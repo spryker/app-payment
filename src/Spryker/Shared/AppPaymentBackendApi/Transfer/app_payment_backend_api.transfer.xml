@@ -110,7 +110,7 @@
 
     <transfer name="CustomerRequest" strict="true">
         <property name="customer" type="Customer"/>
-        <property name="customerPaymentServiceProviderData" type="array"/>
+        <property name="customerPaymentServiceProviderData" type="array" singular="customerPaymentServiceProviderDatum"/>
     </transfer>
 
     <transfer name="CustomerResponse" strict="true">
