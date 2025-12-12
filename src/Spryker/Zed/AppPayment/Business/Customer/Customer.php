@@ -41,7 +41,7 @@ class Customer
             return $customerResponseTransfer;
         }
 
-        if (!$customerRequestTransfer->getCustomer() instanceof CustomerTransfer && empty($customerRequestTransfer->getCustomerPaymentServiceProviderData())) {
+        if (!$customerRequestTransfer->getCustomer() instanceof CustomerTransfer && $customerRequestTransfer->getCustomerPaymentServiceProviderData() === []) {
             $customerResponseTransfer = new CustomerResponseTransfer();
             $customerResponseTransfer
                 ->setIsSuccessful(false)
